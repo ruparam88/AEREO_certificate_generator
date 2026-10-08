@@ -175,7 +175,11 @@
           </div>
 
           <!-- Position Sliders & Field Typography Controls -->
-          <div style="background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 6px; padding: 1rem;">
+          <div id="positionerControlsGroup" style="background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 6px; padding: 1rem; transition: opacity 0.2s;">
+            <!-- Notice Banner for Inbuilt Templates -->
+            <div id="inbuiltNoticeBanner" style="display: none; background: #e0f2fe; border: 1px solid #bae6fd; border-radius: 6px; padding: 0.65rem 0.85rem; margin-bottom: 1rem; font-size: 0.8rem; color: #0369a1; line-height: 1.4;">
+              <strong>Inbuilt Template:</strong> Standard layout and typography are fixed. Custom positioning, fonts, sizes, and colors are disabled for inbuilt templates (select or upload a custom template to customize).
+            </div>
             <!-- Recipient Name Controls -->
             <div style="margin-bottom: 1rem;">
               <div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.25rem;">
@@ -314,8 +318,8 @@
 
             <!-- Action Buttons -->
             <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; margin-top: 1rem;">
-              <button class="btn btn-primary btn-sm" onclick="saveTemplateLayout()">Save Layout to Template</button>
-              <button class="btn btn-secondary btn-sm" onclick="resetToAutoDetectedLayout()">Reset to Default</button>
+              <button id="btnSaveLayout" class="btn btn-primary btn-sm" onclick="saveTemplateLayout()">Save Layout to Template</button>
+              <button id="btnResetLayout" class="btn btn-secondary btn-sm" onclick="resetToAutoDetectedLayout()">Reset to Default</button>
               <span id="saveLayoutStatus" style="font-size: 0.8rem; font-weight: 500;"></span>
             </div>
           </div>
@@ -494,6 +498,29 @@
       const tmpl = loadedTemplatesList.find(t => t.id === id || t.name === id);
       if (!tmpl) return;
 
+      const isBuiltin = Boolean(tmpl.is_builtin);
+
+      // Toggle notice banner and card dimming for inbuilt templates
+      const banner = document.getElementById("inbuiltNoticeBanner");
+      const controlsGroup = document.getElementById("positionerControlsGroup");
+      if (banner) banner.style.display = isBuiltin ? "block" : "none";
+      if (controlsGroup) {
+        controlsGroup.style.opacity = isBuiltin ? "0.55" : "1";
+        controlsGroup.style.pointerEvents = isBuiltin ? "none" : "auto";
+      }
+
+      // Disable or enable all typography & layout positioning controls
+      const controlIds = [
+        "sliderNameX", "sliderNameY", "fontNameSelect", "sliderNameSize", "pickerNameColor",
+        "checkShowCourse", "sliderCourseX", "sliderCourseY", "fontCourseSelect", "sliderCourseSize", "pickerCourseColor",
+        "checkShowDate", "sliderDateX", "sliderDateY", "fontDateSelect", "sliderDateSize", "pickerDateColor",
+        "btnSaveLayout", "btnResetLayout"
+      ];
+      controlIds.forEach(ctrlId => {
+        const el = document.getElementById(ctrlId);
+        if (el) el.disabled = isBuiltin;
+      });
+
       const nameY = (tmpl.name_y_ratio != null ? tmpl.name_y_ratio : 0.515) * 100;
       const nameX = (tmpl.name_x_ratio != null ? tmpl.name_x_ratio : 0.5) * 100;
       const courseY = (tmpl.course_y_ratio != null ? tmpl.course_y_ratio : 0.42) * 100;
@@ -610,8 +637,16 @@
       if (!canvas) return;
       const ctx = canvas.getContext("2d");
 
+      const tmpl = loadedTemplatesList.find(t => t.id === selectedTemplateId || t.name === selectedTemplateId);
+      const isBuiltin = tmpl && Boolean(tmpl.is_builtin);
+
+      // Dynamically compute canvas aspect ratio to match the template exactly
+      let aspect = 11 / 8.5; // US Letter landscape default (1.2941)
+      if (isPreviewImgLoaded && currentPreviewImg && currentPreviewImg.naturalWidth > 0) {
+        aspect = currentPreviewImg.naturalWidth / currentPreviewImg.naturalHeight;
+      }
       canvas.width = 880;
-      canvas.height = 680;
+      canvas.height = Math.round(880 / aspect);
       const w = canvas.width;
       const h = canvas.height;
 
@@ -621,7 +656,6 @@
       if (isPreviewImgLoaded && currentPreviewImg && currentPreviewImg.naturalWidth > 0) {
         ctx.drawImage(currentPreviewImg, 0, 0, w, h);
       } else {
-        const tmpl = loadedTemplatesList.find(t => t.id === selectedTemplateId || t.name === selectedTemplateId);
         const isDark = tmpl && tmpl.name === "elegant";
         ctx.fillStyle = isDark ? "#1b2a4a" : (tmpl && tmpl.name === "classic" ? "#fff8e7" : "#ffffff");
         ctx.fillRect(0, 0, w, h);
@@ -641,6 +675,12 @@
         ctx.fillStyle = isDark ? "#cbd5e1" : "#64748b";
         ctx.font = "italic 15px sans-serif";
         ctx.fillText("This is to certify that", w / 2, 180);
+      }
+
+      // For inbuilt templates, custom typography and positioning are disabled.
+      // The background image already displays the complete template design.
+      if (isBuiltin) {
+        return;
       }
 
       // Slider coordinates
@@ -665,6 +705,11 @@
       const dateSize = parseFloat(document.getElementById("sliderDateSize")?.value || 12);
       const dateColor = document.getElementById("pickerDateColor")?.value || "#0a001d";
 
+      // ReportLab points: page_width = 595.27 * aspect.
+      // Canvas pixels: w = 880.
+      // Scale font sizes so canvas rendering matches ReportLab PDF points precisely:
+      const fontScale = w / (595.27 * aspect);
+
       // ReportLab coordinates: Y=0 at bottom, Canvas Y=0 at top
       const nameCanvasX = w * nameXRatio;
       const nameCanvasY = h * (1.0 - nameYRatio);
@@ -672,7 +717,8 @@
       // Recipient Name
       ctx.fillStyle = nameColor;
       const nameWeight = (nameFont === "Great Vibes") ? "normal" : "bold";
-      ctx.font = `${nameWeight} ${nameSize}px ${getCssFontFamily(nameFont)}`;
+      const scaledNameSize = Math.round(nameSize * fontScale);
+      ctx.font = `${nameWeight} ${scaledNameSize}px ${getCssFontFamily(nameFont)}`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText("Jane Doe", nameCanvasX, nameCanvasY);
@@ -690,7 +736,8 @@
 
         ctx.fillStyle = courseColor;
         const courseWeight = (courseFont === "Great Vibes") ? "normal" : "bold";
-        ctx.font = `${courseWeight} ${courseSize}px ${getCssFontFamily(courseFont)}`;
+        const scaledCourseSize = Math.round(courseSize * fontScale);
+        ctx.font = `${courseWeight} ${scaledCourseSize}px ${getCssFontFamily(courseFont)}`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText("Mastering Drone Analytics & AI", courseCanvasX, courseCanvasY);
@@ -708,7 +755,8 @@
 
         ctx.fillStyle = dateColor;
         const dateWeight = (dateFont === "Great Vibes") ? "normal" : "600";
-        ctx.font = `${dateWeight} ${dateSize}px ${getCssFontFamily(dateFont)}`;
+        const scaledDateSize = Math.round(dateSize * fontScale);
+        ctx.font = `${dateWeight} ${scaledDateSize}px ${getCssFontFamily(dateFont)}`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText("2024-12-15", dateCanvasX, dateCanvasY);
@@ -721,6 +769,9 @@
     }
 
     function onSliderMove() {
+      const tmpl = loadedTemplatesList.find(t => t.id === selectedTemplateId || t.name === selectedTemplateId);
+      if (tmpl && tmpl.is_builtin) return;
+
       updateSliderLabels();
       renderPreviewCanvas();
 
@@ -729,6 +780,8 @@
     }
 
     function sendWsCoordsUpdate() {
+      const tmpl = loadedTemplatesList.find(t => t.id === selectedTemplateId || t.name === selectedTemplateId);
+      if (tmpl && tmpl.is_builtin) return;
       if (!previewWs || previewWs.readyState !== WebSocket.OPEN) return;
       const payload = {
         action: "update_coords",
@@ -755,7 +808,17 @@
     }
 
     async function saveTemplateLayout() {
+      const tmpl = loadedTemplatesList.find(t => t.id === selectedTemplateId || t.name === selectedTemplateId);
       const status = document.getElementById("saveLayoutStatus");
+
+      if (tmpl && tmpl.is_builtin) {
+        if (status) {
+          status.textContent = "Custom layout is disabled for inbuilt templates.";
+          status.style.color = "#0369a1";
+        }
+        return;
+      }
+
       if (status) {
         status.textContent = "Saving layout & styling...";
         status.style.color = "#1e40af";
@@ -821,7 +884,10 @@
             date_color: payload.date_color,
           }),
         });
-        if (!res.ok) throw new Error("Failed to save layout via API");
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.detail || "Failed to save layout via API");
+        }
         const updatedTmpl = await res.json();
         if (status) {
           status.textContent = `Layout & styling saved for '${updatedTmpl.name}'!`;
@@ -840,6 +906,8 @@
 
     function resetToAutoDetectedLayout() {
       const tmpl = loadedTemplatesList.find(t => t.id === selectedTemplateId || t.name === selectedTemplateId);
+      if (tmpl && tmpl.is_builtin) return;
+
       const isPreprinted = tmpl && tmpl.overlay_mode === "preprinted";
       document.getElementById("sliderNameX").value = 50.0;
       document.getElementById("sliderNameY").value = isPreprinted ? 55.8 : 51.5;

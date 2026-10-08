@@ -730,7 +730,9 @@ def _draw_preprinted_custom_content(
     c.setFillColor(name_col)
     name_y = page_height * (name_y_ratio if name_y_ratio is not None else 0.558)
     name_x = page_width * (name_x_ratio if name_x_ratio is not None else 0.5)
-    c.drawCentredString(name_x, name_y, recipient_name)
+    # Align ReportLab baseline with visual center (Canvas textBaseline = "middle")
+    baseline_name_y = name_y - (name_font_size * 0.35)
+    c.drawCentredString(name_x, baseline_name_y, recipient_name)
 
     # 2. Course Name: field-specific font, size, and color
     if show_course and course_y_ratio is not None and course_name:
@@ -744,7 +746,8 @@ def _draw_preprinted_custom_content(
         course_x = page_width * (course_x_ratio if course_x_ratio is not None else 0.562)
         c.setFont(resolved_course_font, c_font_size)
         c.setFillColor(course_col)
-        c.drawCentredString(course_x, course_y, course_name)
+        baseline_course_y = course_y - (c_font_size * 0.35)
+        c.drawCentredString(course_x, baseline_course_y, course_name)
 
     # 3. Issue Date: field-specific font, size, and color
     if show_date and date_y_ratio is not None and date:
@@ -756,7 +759,8 @@ def _draw_preprinted_custom_content(
         date_x = page_width * (date_x_ratio if date_x_ratio is not None else 0.585)
         c.setFont(resolved_date_font, d_font_size)
         c.setFillColor(date_col)
-        c.drawCentredString(date_x, date_y, date)
+        baseline_date_y = date_y - (d_font_size * 0.35)
+        c.drawCentredString(date_x, baseline_date_y, date)
 
     # 4. Certificate ID: subtle footer at bottom margin
     c.setFont("Helvetica", 8)

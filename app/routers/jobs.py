@@ -628,6 +628,12 @@ def update_template_layout(
     if not template:
         raise HTTPException(status_code=404, detail="Template not found")
 
+    if template.is_builtin:
+        raise HTTPException(
+            status_code=400,
+            detail="Custom layout and typography positioning are disabled for inbuilt templates.",
+        )
+
     template.name_x_ratio = layout.name_x_ratio
     template.name_y_ratio = layout.name_y_ratio
     template.course_x_ratio = layout.course_x_ratio
@@ -700,49 +706,57 @@ async def websocket_preview_endpoint(websocket: WebSocket, db: Session = Depends
                 tmpl = db.query(Template).filter(
                     (Template.id == template_id) | (Template.name == template_id)
                 ).first()
-                if tmpl:
-                    tmpl.name_x_ratio = name_x
-                    tmpl.name_y_ratio = name_y
-                    tmpl.course_x_ratio = course_x
-                    tmpl.course_y_ratio = course_y
-                    tmpl.date_x_ratio = date_x
-                    tmpl.date_y_ratio = date_y
-                    tmpl.show_course = 1 if show_course else 0
-                    tmpl.show_date = 1 if show_date else 0
-                    if name_font is not None:
-                        tmpl.name_font = name_font
-                    if name_size is not None:
-                        tmpl.name_size = name_size
-                    if name_color is not None:
-                        tmpl.name_color = name_color
-                    if course_font is not None:
-                        tmpl.course_font = course_font
-                    if course_size is not None:
-                        tmpl.course_size = course_size
-                    if course_color is not None:
-                        tmpl.course_color = course_color
-                    if date_font is not None:
-                        tmpl.date_font = date_font
-                    if date_size is not None:
-                        tmpl.date_size = date_size
-                    if date_color is not None:
-                        tmpl.date_color = date_color
-
-                    if not tmpl.is_builtin:
-                        tmpl.overlay_mode = "preprinted"
-                    db.commit()
-                    await websocket.send_json({
-                        "action": "coords_saved",
-                        "status": "ok",
-                        "template_id": tmpl.id,
-                        "template_name": tmpl.name,
-                        "message": f"Layout & styling saved successfully for '{tmpl.name}'!",
-                    })
-                else:
+                if not tmpl:
                     await websocket.send_json({
                         "action": "error",
                         "detail": f"Template '{template_id}' not found",
                     })
+                    continue
+
+                if tmpl.is_builtin:
+                    await websocket.send_json({
+                        "action": "error",
+                        "detail": "Custom layout and typography positioning are disabled for inbuilt templates.",
+                    })
+                    continue
+
+                tmpl.name_x_ratio = name_x
+                tmpl.name_y_ratio = name_y
+                tmpl.course_x_ratio = course_x
+                tmpl.course_y_ratio = course_y
+                tmpl.date_x_ratio = date_x
+                tmpl.date_y_ratio = date_y
+                tmpl.show_course = 1 if show_course else 0
+                tmpl.show_date = 1 if show_date else 0
+                if name_font is not None:
+                    tmpl.name_font = name_font
+                if name_size is not None:
+                    tmpl.name_size = name_size
+                if name_color is not None:
+                    tmpl.name_color = name_color
+                if course_font is not None:
+                    tmpl.course_font = course_font
+                if course_size is not None:
+                    tmpl.course_size = course_size
+                if course_color is not None:
+                    tmpl.course_color = course_color
+                if date_font is not None:
+                    tmpl.date_font = date_font
+                if date_size is not None:
+                    tmpl.date_size = date_size
+                if date_color is not None:
+                    tmpl.date_color = date_color
+
+                if not tmpl.is_builtin:
+                    tmpl.overlay_mode = "preprinted"
+                db.commit()
+                await websocket.send_json({
+                    "action": "coords_saved",
+                    "status": "ok",
+                    "template_id": tmpl.id,
+                    "template_name": tmpl.name,
+                    "message": f"Layout & styling saved successfully for '{tmpl.name}'!",
+                })
             else:
                 await websocket.send_json({
                     "action": "coords_updated",

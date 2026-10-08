@@ -357,3 +357,34 @@ def test_put_template_layout_updates_styling(client: TestClient, db_session):
     assert data["date_size"] == 11.0
     assert data["date_color"] == "#64748b"
 
+
+def test_put_template_layout_builtin_fails_with_400(client: TestClient):
+    """PUT /api/v1/templates/{id}/layout should reject built-in templates with 400 Bad Request."""
+    for builtin_id in ["classic", "modern", "elegant"]:
+        res = client.put(
+            f"/api/v1/templates/{builtin_id}/layout",
+            json={
+                "name_x_ratio": 0.5,
+                "name_y_ratio": 0.55,
+                "name_font": "Arial",
+                "name_size": 34.0,
+            },
+        )
+        assert res.status_code == 400
+        assert "disabled for inbuilt templates" in res.json()["detail"].lower()
+
+
+def test_websocket_save_coords_builtin_fails(client: TestClient):
+    """WebSocket save_coords should reject built-in templates with an error message."""
+    with client.websocket_connect("/api/v1/ws/preview") as ws:
+        ws.send_json({
+            "action": "save_coords",
+            "template_id": "classic",
+            "name_x": 0.5,
+            "name_y": 0.55,
+        })
+        msg = ws.receive_json()
+        assert msg["action"] == "error"
+        assert "disabled for inbuilt templates" in msg["detail"].lower()
+
+

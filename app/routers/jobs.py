@@ -28,10 +28,11 @@ from app.database import get_db
 from app.models import Job, Certificate, Template, CertificateStatus
 from app.schemas import (
     JobCreate, JobResponse, JobDetailResponse,
-    CertificateResponse, TemplateResponse,
+    CertificateResponse, TemplateResponse, RecipientCreate,
 )
 from app.services.job_service import create_job, process_job
 from app.services.certificate_generator import detect_template_layout
+from app.services.sheet_parser import parse_recipients_file
 from app.config import settings
 
 router = APIRouter(tags=["Certificate Jobs"])
@@ -69,6 +70,63 @@ def create_generation_job(
     # Enqueue background processing
     background_tasks.add_task(process_job, job.id)
 
+    return job
+
+
+@router.post(
+    "/recipients/parse-file",
+    response_model=list[RecipientCreate],
+    summary="Parse recipients from an Excel (.xlsx) or CSV (.csv) spreadsheet",
+)
+async def parse_spreadsheet_file(
+    file: UploadFile = File(..., description="Excel (.xlsx) or CSV (.csv) file"),
+):
+    """Upload an Excel (.xlsx) or CSV (.csv) spreadsheet and extract validated recipients.
+
+    Supports intelligent column matching (Name, Course, Date, Email).
+    Returns the parsed and validated recipient list ready for verification or job submission.
+    """
+    content = await file.read()
+    if not content:
+        raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+
+    try:
+        recipients = parse_recipients_file(content, file.filename or "file.csv")
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    return recipients
+
+
+@router.post(
+    "/jobs/upload-sheet",
+    response_model=JobResponse,
+    status_code=202,
+    summary="Submit bulk generation job directly from an Excel (.xlsx) or CSV (.csv) spreadsheet",
+)
+async def create_job_from_spreadsheet(
+    background_tasks: BackgroundTasks,
+    file: UploadFile = File(..., description="Excel (.xlsx) or CSV (.csv) file"),
+    template_id: str = Form("classic", description="Template ID to use"),
+    db: Session = Depends(get_db),
+):
+    """Upload a spreadsheet directly and start generating certificates in the background."""
+    content = await file.read()
+    if not content:
+        raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+
+    try:
+        recipients = parse_recipients_file(content, file.filename or "file.csv")
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    job_data = JobCreate(recipients=recipients, template_id=template_id)
+    try:
+        job = create_job(db, job_data)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    background_tasks.add_task(process_job, job.id)
     return job
 
 

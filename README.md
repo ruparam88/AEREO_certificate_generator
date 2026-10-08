@@ -15,6 +15,14 @@ A high-performance FastAPI service to generate PDF certificates in bulk with cus
 - **Flexible Downloads**: Download individual PDFs or all certificates in a ZIP archive
 - **Interactive UI & Docs**: Built-in web dashboard and Swagger UI (`/docs`)
 
+## Feature Status & Roadmap
+
+- [x] **1. Upload Custom Template**: Upload user-designed backgrounds in PNG, JPEG, or PDF formats
+- [x] **2. Individual & Bulk Downloads**: Download single certificates as PDF or all certificates as a ZIP archive
+- [x] **3. Excel / CSV File Upload**: Upload Excel spreadsheets (.xlsx) or CSV files to generate certificates in bulk
+- [ ] **4. Font & Color Selection**: Select custom font styles and colors for certificate text
+- [ ] **5. Live Certificate Preview**: Real-time preview showing how font style, size, and color look before generating
+
 ## Tech Stack
 
 | Component | Technology |
@@ -112,6 +120,8 @@ pytest tests/ -v
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | `POST` | `/api/v1/jobs` | Submit a bulk certificate generation request |
+| `POST` | `/api/v1/jobs/upload-sheet` | Submit batch generation directly from Excel/CSV file |
+| `POST` | `/api/v1/recipients/parse-file` | Parse and validate recipients from Excel/CSV file |
 | `GET` | `/api/v1/jobs` | List all jobs (paginated) |
 | `GET` | `/api/v1/jobs/{job_id}` | Get job status and certificate details |
 | `GET` | `/api/v1/jobs/{job_id}/certificates` | List certificates for a job |
@@ -258,7 +268,8 @@ Each certificate is generated inside its own `try/except` block. A failure on on
 │   │   └── jobs.py              # API routes (/jobs, /certificates, /templates)
 │   └── services/
 │       ├── job_service.py       # Batch job management & async processing
-│       └── certificate_generator.py # ReportLab PDF rendering engine
+│       ├── certificate_generator.py # ReportLab PDF rendering engine
+│       └── sheet_parser.py      # Excel (.xlsx) and CSV spreadsheet ingestion
 ├── outputs/                     # Visual results & template previews
-└── tests/                       # Complete pytest suite (49 passing tests)
+└── tests/                       # Complete pytest suite (55 passing tests)
 ```

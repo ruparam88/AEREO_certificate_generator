@@ -44,6 +44,8 @@ async def lifespan(app: FastAPI):
                 cursor.execute("ALTER TABLE templates ADD COLUMN overlay_mode VARCHAR(50) DEFAULT 'full'")
             if cols and "name_y_ratio" not in cols:
                 cursor.execute("ALTER TABLE templates ADD COLUMN name_y_ratio FLOAT DEFAULT 0.515")
+            if cols and "name_x_ratio" not in cols:
+                cursor.execute("ALTER TABLE templates ADD COLUMN name_x_ratio FLOAT DEFAULT 0.5")
             if cols and "course_y_ratio" not in cols:
                 cursor.execute("ALTER TABLE templates ADD COLUMN course_y_ratio FLOAT")
             if cols and "course_x_ratio" not in cols:

@@ -19,16 +19,16 @@ from typing import Optional
 
 from fastapi import (
     APIRouter, BackgroundTasks, Depends, HTTPException, Query,
-    UploadFile, File, Form,
+    UploadFile, File, Form, WebSocket, WebSocketDisconnect, Response,
 )
 from fastapi.responses import FileResponse, StreamingResponse
 from sqlalchemy.orm import Session
 
-from app.database import get_db
+from app.database import get_db, SessionLocal
 from app.models import Job, Certificate, Template, CertificateStatus
 from app.schemas import (
     JobCreate, JobResponse, JobDetailResponse,
-    CertificateResponse, TemplateResponse, RecipientCreate,
+    CertificateResponse, TemplateResponse, RecipientCreate, TemplateLayoutUpdate,
 )
 from app.services.job_service import create_job, process_job
 from app.services.certificate_generator import detect_template_layout
@@ -349,6 +349,10 @@ def upload_template(
         0.515,
         description="Vertical position ratio of recipient name from bottom (default 0.515)",
     ),
+    name_x_ratio: float = Form(
+        0.5,
+        description="Horizontal center ratio of recipient name from left (default 0.5)",
+    ),
     overwrite: bool = Form(
         False,
         description="Overwrite existing template if a template with the same name already exists",
@@ -446,6 +450,7 @@ def upload_template(
         existing.file_path = os.path.abspath(save_path)
         existing.overlay_mode = overlay_mode
         existing.name_y_ratio = name_y_ratio
+        existing.name_x_ratio = name_x_ratio
         existing.course_y_ratio = course_y_ratio
         existing.course_x_ratio = course_x_ratio
         existing.date_y_ratio = date_y_ratio
@@ -468,6 +473,7 @@ def upload_template(
         is_builtin=0,
         overlay_mode=overlay_mode,
         name_y_ratio=name_y_ratio,
+        name_x_ratio=name_x_ratio,
         course_y_ratio=course_y_ratio,
         course_x_ratio=course_x_ratio,
         date_y_ratio=date_y_ratio,
@@ -541,3 +547,174 @@ def delete_template(template_id: str, db: Session = Depends(get_db)):
     db.commit()
 
     return {"message": f"Template '{template_name}' deleted successfully", "id": template_id}
+
+
+# ---------------------------------------------------------------------------
+# Template Preview & Layout Positioning
+# ---------------------------------------------------------------------------
+
+@router.get(
+    "/templates/{template_id}/background",
+    summary="Get background image for a template",
+)
+def get_template_background(template_id: str, db: Session = Depends(get_db)):
+    """Return the raw image for a template to render on the live preview canvas."""
+    template = db.query(Template).filter(
+        (Template.id == template_id) | (Template.name == template_id)
+    ).first()
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+
+    # If user-uploaded file exists
+    if template.file_path and os.path.exists(template.file_path):
+        ext = template.file_path.lower().split(".")[-1]
+        if ext in ("png", "jpg", "jpeg"):
+            media = "image/png" if ext == "png" else "image/jpeg"
+            return FileResponse(template.file_path, media_type=media)
+        elif ext == "pdf":
+            try:
+                import pypdf
+                r = pypdf.PdfReader(template.file_path)
+                if r.pages and len(r.pages[0].images) > 0:
+                    img_data = r.pages[0].images[0].data
+                    return Response(content=img_data, media_type="image/png")
+            except Exception:
+                pass
+
+    # Built-in or fallback preview
+    builtin_map = {
+        "classic": os.path.abspath("outputs/certificate_classic.png"),
+        "modern": os.path.abspath("outputs/certificate_modern.png"),
+        "elegant": os.path.abspath("outputs/certificate_elegant.png"),
+    }
+    fallback_path = builtin_map.get(template.name)
+    if fallback_path and os.path.exists(fallback_path):
+        return FileResponse(fallback_path, media_type="image/png")
+
+    # If custom template has outputs/template2.png as fallback
+    if os.path.exists("outputs/template2.png"):
+        return FileResponse(os.path.abspath("outputs/template2.png"), media_type="image/png")
+
+    # Dynamic fallback rendering if image file does not exist on disk
+    try:
+        from PIL import Image, ImageDraw
+        bg_col = "#FFF8E7" if template.name == "classic" else ("#1B2A4A" if template.name == "elegant" else "#FFFFFF")
+        border_col = "#C8A951" if template.name in ("classic", "elegant") else "#2E86AB"
+        img = Image.new("RGB", (880, 680), bg_col)
+        draw = ImageDraw.Draw(img)
+        draw.rectangle([20, 20, 860, 660], outline=border_col, width=4)
+        draw.rectangle([35, 35, 845, 645], outline=border_col, width=2)
+        buf = io.BytesIO()
+        img.save(buf, format="PNG")
+        return Response(content=buf.getvalue(), media_type="image/png")
+    except Exception:
+        raise HTTPException(status_code=404, detail="Background preview image not available")
+
+
+@router.put(
+    "/templates/{template_id}/layout",
+    response_model=TemplateResponse,
+    summary="Update layout coordinates for a template",
+)
+def update_template_layout(
+    template_id: str,
+    layout: TemplateLayoutUpdate,
+    db: Session = Depends(get_db),
+):
+    """Save calibrated layout coordinates and field visibility for a template."""
+    template = db.query(Template).filter(
+        (Template.id == template_id) | (Template.name == template_id)
+    ).first()
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+
+    template.name_x_ratio = layout.name_x_ratio
+    template.name_y_ratio = layout.name_y_ratio
+    template.course_x_ratio = layout.course_x_ratio
+    template.course_y_ratio = layout.course_y_ratio
+    template.date_x_ratio = layout.date_x_ratio
+    template.date_y_ratio = layout.date_y_ratio
+    template.show_course = 1 if layout.show_course else 0
+    template.show_date = 1 if layout.show_date else 0
+    if not template.is_builtin:
+        template.overlay_mode = "preprinted"
+
+    db.commit()
+    db.refresh(template)
+    return TemplateResponse.model_validate(template)
+
+
+@router.websocket("/ws/preview")
+async def websocket_preview_endpoint(websocket: WebSocket, db: Session = Depends(get_db)):
+    """WebSocket endpoint for real-time live certificate positioning and layout updates."""
+    await websocket.accept()
+    try:
+        while True:
+            data = await websocket.receive_json()
+            action = data.get("action", "preview")
+
+            if action == "ping":
+                await websocket.send_json({"action": "pong"})
+                continue
+
+            template_id = data.get("template_id")
+            name_x = float(data.get("name_x", 0.5))
+            name_y = float(data.get("name_y", 0.515))
+            course_x = float(data["course_x"]) if data.get("course_x") is not None else None
+            course_y = float(data["course_y"]) if data.get("course_y") is not None else None
+            date_x = float(data["date_x"]) if data.get("date_x") is not None else None
+            date_y = float(data["date_y"]) if data.get("date_y") is not None else None
+            show_course = bool(data.get("show_course", True))
+            show_date = bool(data.get("show_date", True))
+
+            if action == "save_coords":
+                tmpl = db.query(Template).filter(
+                    (Template.id == template_id) | (Template.name == template_id)
+                ).first()
+                if tmpl:
+                    tmpl.name_x_ratio = name_x
+                    tmpl.name_y_ratio = name_y
+                    tmpl.course_x_ratio = course_x
+                    tmpl.course_y_ratio = course_y
+                    tmpl.date_x_ratio = date_x
+                    tmpl.date_y_ratio = date_y
+                    tmpl.show_course = 1 if show_course else 0
+                    tmpl.show_date = 1 if show_date else 0
+                    if not tmpl.is_builtin:
+                        tmpl.overlay_mode = "preprinted"
+                    db.commit()
+                    await websocket.send_json({
+                        "action": "coords_saved",
+                        "status": "ok",
+                        "template_id": tmpl.id,
+                        "template_name": tmpl.name,
+                        "message": f"Layout coordinates saved successfully for '{tmpl.name}'!",
+                    })
+                else:
+                    await websocket.send_json({
+                        "action": "error",
+                        "detail": f"Template '{template_id}' not found",
+                    })
+            else:
+                await websocket.send_json({
+                    "action": "coords_updated",
+                    "status": "ok",
+                    "coords": {
+                        "name_x": round(name_x, 3),
+                        "name_y": round(name_y, 3),
+                        "course_x": round(course_x, 3) if course_x is not None else None,
+                        "course_y": round(course_y, 3) if course_y is not None else None,
+                        "date_x": round(date_x, 3) if date_x is not None else None,
+                        "date_y": round(date_y, 3) if date_y is not None else None,
+                        "show_course": show_course,
+                        "show_date": show_date,
+                    },
+                })
+    except WebSocketDisconnect:
+        pass
+    except Exception as e:
+        try:
+            await websocket.send_json({"action": "error", "detail": str(e)})
+        except Exception:
+            pass
+

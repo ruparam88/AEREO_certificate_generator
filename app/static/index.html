@@ -151,6 +151,83 @@
           </div>
         </div>
       </details>
+
+      <!-- Interactive Template Layout Positioner & Live Preview -->
+      <div id="positionerCard" style="margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--gray-200);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+          <h3 style="margin: 0; font-size: 1.05rem;">Live Template Layout Positioner</h3>
+          <span id="wsStatusBadge" style="font-size: 0.75rem; padding: 2px 8px; border-radius: 9999px; background: #dbeafe; color: #1e40af; font-weight: 600;">
+            WebSocket Live Sync
+          </span>
+        </div>
+        <p style="font-size: 0.8rem; color: var(--gray-700); margin-bottom: 1rem;">
+          Adjust sliders to position Name, Course, and Date anywhere on your template. Changes sync over WebSocket and are saved for all certificates generated with this template.
+        </p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; align-items: start;" id="positionerGrid">
+          <!-- Canvas Live Preview -->
+          <div style="border: 1px solid var(--gray-300); border-radius: 6px; overflow: hidden; background: #f8fafc; text-align: center; padding: 0.5rem;">
+            <canvas id="previewCanvas" width="880" height="680" style="max-width: 100%; height: auto; display: block; margin: 0 auto; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);"></canvas>
+            <div style="font-size: 0.75rem; color: var(--gray-500); margin-top: 0.35rem;">Live Preview Canvas (Coordinates sync via WebSocket)</div>
+          </div>
+
+          <!-- Position Sliders -->
+          <div style="background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 6px; padding: 1rem;">
+            <!-- Recipient Name Controls -->
+            <div style="margin-bottom: 1rem;">
+              <div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.25rem;">
+                <span>Recipient Name</span>
+                <span id="valNamePos" style="color: var(--primary);">X: 50.0%, Y: 55.8%</span>
+              </div>
+              <label style="font-size: 0.75rem; color: var(--gray-600); display: block;">Vertical (Height from bottom):</label>
+              <input type="range" id="sliderNameY" min="10" max="90" step="0.5" value="55.8" style="width: 100%;" oninput="onSliderMove()">
+              <label style="font-size: 0.75rem; color: var(--gray-600); display: block; margin-top: 0.35rem;">Horizontal (Center from left):</label>
+              <input type="range" id="sliderNameX" min="10" max="90" step="0.5" value="50" style="width: 100%;" oninput="onSliderMove()">
+            </div>
+
+            <!-- Course Controls -->
+            <div style="margin-bottom: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--gray-200);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                <label style="font-weight: 600; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 0.35rem;">
+                  <input type="checkbox" id="checkShowCourse" checked onchange="onSliderMove()">
+                  <span>Course / Event Title</span>
+                </label>
+                <span id="valCoursePos" style="font-size: 0.85rem; color: var(--primary);">X: 56.2%, Y: 46.6%</span>
+              </div>
+              <div id="courseSliderGroup">
+                <label style="font-size: 0.75rem; color: var(--gray-600); display: block;">Vertical (Height from bottom):</label>
+                <input type="range" id="sliderCourseY" min="10" max="90" step="0.5" value="46.6" style="width: 100%;" oninput="onSliderMove()">
+                <label style="font-size: 0.75rem; color: var(--gray-600); display: block; margin-top: 0.35rem;">Horizontal (Center from left):</label>
+                <input type="range" id="sliderCourseX" min="10" max="90" step="0.5" value="56.2" style="width: 100%;" oninput="onSliderMove()">
+              </div>
+            </div>
+
+            <!-- Date Controls -->
+            <div style="margin-bottom: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--gray-200);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                <label style="font-weight: 600; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 0.35rem;">
+                  <input type="checkbox" id="checkShowDate" checked onchange="onSliderMove()">
+                  <span>Issue Date</span>
+                </label>
+                <span id="valDatePos" style="font-size: 0.85rem; color: var(--primary);">X: 58.5%, Y: 33.4%</span>
+              </div>
+              <div id="dateSliderGroup">
+                <label style="font-size: 0.75rem; color: var(--gray-600); display: block;">Vertical (Height from bottom):</label>
+                <input type="range" id="sliderDateY" min="10" max="90" step="0.5" value="33.4" style="width: 100%;" oninput="onSliderMove()">
+                <label style="font-size: 0.75rem; color: var(--gray-600); display: block; margin-top: 0.35rem;">Horizontal (Center from left):</label>
+                <input type="range" id="sliderDateX" min="10" max="90" step="0.5" value="58.5" style="width: 100%;" oninput="onSliderMove()">
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; margin-top: 1rem;">
+              <button class="btn btn-primary btn-sm" onclick="saveTemplateLayout()">Save Layout to Template</button>
+              <button class="btn btn-secondary btn-sm" onclick="resetToAutoDetectedLayout()">Reset to Default</button>
+              <span id="saveLayoutStatus" style="font-size: 0.8rem; font-weight: 500;"></span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- STEP 2: RECIPIENTS INPUT -->
@@ -209,6 +286,12 @@
     let selectedTemplateId = "classic";
     let activeJobId = null;
     let pollInterval = null;
+    let loadedTemplatesList = [];
+    let currentPreviewImg = new Image();
+    let isPreviewImgLoaded = false;
+    let previewWs = null;
+    let wsReconnectTimer = null;
+    let wsDebounceTimer = null;
 
     function escapeHtml(str) {
       if (!str) return "";
@@ -220,11 +303,333 @@
         .replace(/'/g, "&#039;");
     }
 
+    function initPreviewWebSocket() {
+      const badge = document.getElementById("wsStatusBadge");
+      const protocol = location.protocol === "https:" ? "wss:" : "ws:";
+      const wsUrl = `${protocol}//${location.host}/api/v1/ws/preview`;
+
+      try {
+        previewWs = new WebSocket(wsUrl);
+
+        previewWs.onopen = () => {
+          if (badge) {
+            badge.textContent = "WebSocket Live Sync (Connected)";
+            badge.style.background = "#dcfce7";
+            badge.style.color = "#166534";
+          }
+        };
+
+        previewWs.onmessage = (event) => {
+          try {
+            const msg = JSON.parse(event.data);
+            if (msg.action === "coords_saved") {
+              const status = document.getElementById("saveLayoutStatus");
+              if (status) {
+                status.textContent = msg.message || "Layout saved!";
+                status.style.color = "#166534";
+                setTimeout(() => { if (status) status.textContent = ""; }, 4000);
+              }
+            }
+          } catch (e) {
+            console.error("WS error:", e);
+          }
+        };
+
+        previewWs.onclose = () => {
+          if (badge) {
+            badge.textContent = "WebSocket Reconnecting...";
+            badge.style.background = "#fee2e2";
+            badge.style.color = "#991b1b";
+          }
+          clearTimeout(wsReconnectTimer);
+          wsReconnectTimer = setTimeout(initPreviewWebSocket, 2500);
+        };
+
+        previewWs.onerror = () => {
+          if (previewWs) previewWs.close();
+        };
+      } catch (err) {
+        console.error("WebSocket init error:", err);
+      }
+    }
+
     function selectTemplate(id) {
       selectedTemplateId = id;
       document.querySelectorAll(".template-card").forEach(c => c.classList.remove("active"));
       const card = document.querySelector(`.template-card[data-id="${id}"]`);
       if (card) card.classList.add("active");
+      loadTemplateToPositioner(id);
+    }
+
+    function loadTemplateToPositioner(id) {
+      const tmpl = loadedTemplatesList.find(t => t.id === id || t.name === id);
+      if (!tmpl) return;
+
+      const nameY = (tmpl.name_y_ratio != null ? tmpl.name_y_ratio : 0.515) * 100;
+      const nameX = (tmpl.name_x_ratio != null ? tmpl.name_x_ratio : 0.5) * 100;
+      const courseY = (tmpl.course_y_ratio != null ? tmpl.course_y_ratio : 0.42) * 100;
+      const courseX = (tmpl.course_x_ratio != null ? tmpl.course_x_ratio : 0.5) * 100;
+      const dateY = (tmpl.date_y_ratio != null ? tmpl.date_y_ratio : 0.33) * 100;
+      const dateX = (tmpl.date_x_ratio != null ? tmpl.date_x_ratio : 0.5) * 100;
+      const showCourse = tmpl.show_course !== 0 && tmpl.show_course !== false;
+      const showDate = tmpl.show_date !== 0 && tmpl.show_date !== false;
+
+      const sliderNameY = document.getElementById("sliderNameY");
+      const sliderNameX = document.getElementById("sliderNameX");
+      const sliderCourseY = document.getElementById("sliderCourseY");
+      const sliderCourseX = document.getElementById("sliderCourseX");
+      const sliderDateY = document.getElementById("sliderDateY");
+      const sliderDateX = document.getElementById("sliderDateX");
+      const checkCourse = document.getElementById("checkShowCourse");
+      const checkDate = document.getElementById("checkShowDate");
+
+      if (sliderNameY) sliderNameY.value = nameY.toFixed(1);
+      if (sliderNameX) sliderNameX.value = nameX.toFixed(1);
+      if (sliderCourseY) sliderCourseY.value = courseY.toFixed(1);
+      if (sliderCourseX) sliderCourseX.value = courseX.toFixed(1);
+      if (sliderDateY) sliderDateY.value = dateY.toFixed(1);
+      if (sliderDateX) sliderDateX.value = dateX.toFixed(1);
+      if (checkCourse) checkCourse.checked = showCourse;
+      if (checkDate) checkDate.checked = showDate;
+
+      updateSliderLabels();
+
+      // Load template background image
+      const bgUrl = `/api/v1/templates/${encodeURIComponent(id)}/background?t=${Date.now()}`;
+      isPreviewImgLoaded = false;
+      currentPreviewImg = new Image();
+      currentPreviewImg.crossOrigin = "anonymous";
+      currentPreviewImg.onload = () => {
+        isPreviewImgLoaded = true;
+        renderPreviewCanvas();
+      };
+      currentPreviewImg.onerror = () => {
+        isPreviewImgLoaded = false;
+        renderPreviewCanvas();
+      };
+      currentPreviewImg.src = bgUrl;
+    }
+
+    function updateSliderLabels() {
+      const nameX = parseFloat(document.getElementById("sliderNameX")?.value || 50);
+      const nameY = parseFloat(document.getElementById("sliderNameY")?.value || 51.5);
+      const courseX = parseFloat(document.getElementById("sliderCourseX")?.value || 50);
+      const courseY = parseFloat(document.getElementById("sliderCourseY")?.value || 42);
+      const dateX = parseFloat(document.getElementById("sliderDateX")?.value || 50);
+      const dateY = parseFloat(document.getElementById("sliderDateY")?.value || 33);
+      const showCourse = document.getElementById("checkShowCourse")?.checked ?? true;
+      const showDate = document.getElementById("checkShowDate")?.checked ?? true;
+
+      const valName = document.getElementById("valNamePos");
+      const valCourse = document.getElementById("valCoursePos");
+      const valDate = document.getElementById("valDatePos");
+      if (valName) valName.textContent = `X: ${nameX.toFixed(1)}%, Y: ${nameY.toFixed(1)}%`;
+      if (valCourse) valCourse.textContent = showCourse ? `X: ${courseX.toFixed(1)}%, Y: ${courseY.toFixed(1)}%` : "Hidden";
+      if (valDate) valDate.textContent = showDate ? `X: ${dateX.toFixed(1)}%, Y: ${dateY.toFixed(1)}%` : "Hidden";
+
+      const courseGrp = document.getElementById("courseSliderGroup");
+      const dateGrp = document.getElementById("dateSliderGroup");
+      if (courseGrp) courseGrp.style.opacity = showCourse ? "1" : "0.35";
+      if (dateGrp) dateGrp.style.opacity = showDate ? "1" : "0.35";
+    }
+
+    function renderPreviewCanvas() {
+      const canvas = document.getElementById("previewCanvas");
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+
+      canvas.width = 880;
+      canvas.height = 680;
+      const w = canvas.width;
+      const h = canvas.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Background
+      if (isPreviewImgLoaded && currentPreviewImg && currentPreviewImg.naturalWidth > 0) {
+        ctx.drawImage(currentPreviewImg, 0, 0, w, h);
+      } else {
+        const tmpl = loadedTemplatesList.find(t => t.id === selectedTemplateId || t.name === selectedTemplateId);
+        const isDark = tmpl && tmpl.name === "elegant";
+        ctx.fillStyle = isDark ? "#1b2a4a" : (tmpl && tmpl.name === "classic" ? "#fff8e7" : "#ffffff");
+        ctx.fillRect(0, 0, w, h);
+
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = tmpl && tmpl.accent_color ? tmpl.accent_color : (isDark ? "#c8a951" : "#2e86ab");
+        ctx.strokeRect(20, 20, w - 40, h - 40);
+
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(32, 32, w - 64, h - 64);
+
+        ctx.fillStyle = isDark ? "#ffffff" : "#0f172a";
+        ctx.font = "bold 24px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("CERTIFICATE OF COMPLETION", w / 2, 130);
+
+        ctx.fillStyle = isDark ? "#cbd5e1" : "#64748b";
+        ctx.font = "italic 15px sans-serif";
+        ctx.fillText("This is to certify that", w / 2, 180);
+      }
+
+      // Slider coordinates
+      const nameXRatio = parseFloat(document.getElementById("sliderNameX")?.value || 50) / 100;
+      const nameYRatio = parseFloat(document.getElementById("sliderNameY")?.value || 51.5) / 100;
+      const courseXRatio = parseFloat(document.getElementById("sliderCourseX")?.value || 50) / 100;
+      const courseYRatio = parseFloat(document.getElementById("sliderCourseY")?.value || 42) / 100;
+      const dateXRatio = parseFloat(document.getElementById("sliderDateX")?.value || 50) / 100;
+      const dateYRatio = parseFloat(document.getElementById("sliderDateY")?.value || 33) / 100;
+      const showCourse = document.getElementById("checkShowCourse")?.checked ?? true;
+      const showDate = document.getElementById("checkShowDate")?.checked ?? true;
+
+      const tmpl = loadedTemplatesList.find(t => t.id === selectedTemplateId || t.name === selectedTemplateId);
+      const primaryColor = (tmpl && tmpl.primary_color) ? tmpl.primary_color : "#0a001d";
+      const fontFamily = (tmpl && tmpl.font_family) ? tmpl.font_family : "sans-serif";
+
+      // ReportLab coordinates: Y=0 at bottom, Canvas Y=0 at top
+      const nameCanvasX = w * nameXRatio;
+      const nameCanvasY = h * (1.0 - nameYRatio);
+
+      // Recipient Name
+      ctx.fillStyle = primaryColor;
+      ctx.font = `bold 32px ${fontFamily}, 'Times New Roman', serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("Jane Doe", nameCanvasX, nameCanvasY);
+
+      // Alignment anchor marker
+      ctx.beginPath();
+      ctx.arc(nameCanvasX, nameCanvasY, 3, 0, 2 * Math.PI);
+      ctx.fillStyle = "rgba(37, 99, 235, 0.75)";
+      ctx.fill();
+
+      // Course Title
+      if (showCourse) {
+        const courseCanvasX = w * courseXRatio;
+        const courseCanvasY = h * (1.0 - courseYRatio);
+
+        ctx.fillStyle = primaryColor;
+        ctx.font = `bold 16px ${fontFamily}, 'Times New Roman', serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("Mastering Drone Analytics & AI", courseCanvasX, courseCanvasY);
+
+        ctx.beginPath();
+        ctx.arc(courseCanvasX, courseCanvasY, 3, 0, 2 * Math.PI);
+        ctx.fillStyle = "rgba(16, 185, 129, 0.75)";
+        ctx.fill();
+      }
+
+      // Issue Date
+      if (showDate) {
+        const dateCanvasX = w * dateXRatio;
+        const dateCanvasY = h * (1.0 - dateYRatio);
+
+        ctx.fillStyle = primaryColor;
+        ctx.font = `600 13px ${fontFamily}, sans-serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("2024-12-15", dateCanvasX, dateCanvasY);
+
+        ctx.beginPath();
+        ctx.arc(dateCanvasX, dateCanvasY, 3, 0, 2 * Math.PI);
+        ctx.fillStyle = "rgba(245, 158, 11, 0.75)";
+        ctx.fill();
+      }
+    }
+
+    function onSliderMove() {
+      updateSliderLabels();
+      renderPreviewCanvas();
+
+      clearTimeout(wsDebounceTimer);
+      wsDebounceTimer = setTimeout(sendWsCoordsUpdate, 40);
+    }
+
+    function sendWsCoordsUpdate() {
+      if (!previewWs || previewWs.readyState !== WebSocket.OPEN) return;
+      const payload = {
+        action: "update_coords",
+        template_id: selectedTemplateId,
+        name_x: parseFloat(document.getElementById("sliderNameX").value) / 100,
+        name_y: parseFloat(document.getElementById("sliderNameY").value) / 100,
+        course_x: parseFloat(document.getElementById("sliderCourseX").value) / 100,
+        course_y: parseFloat(document.getElementById("sliderCourseY").value) / 100,
+        date_x: parseFloat(document.getElementById("sliderDateX").value) / 100,
+        date_y: parseFloat(document.getElementById("sliderDateY").value) / 100,
+        show_course: document.getElementById("checkShowCourse").checked,
+        show_date: document.getElementById("checkShowDate").checked,
+      };
+      previewWs.send(JSON.stringify(payload));
+    }
+
+    async function saveTemplateLayout() {
+      const status = document.getElementById("saveLayoutStatus");
+      if (status) {
+        status.textContent = "Saving layout...";
+        status.style.color = "#1e40af";
+      }
+
+      const payload = {
+        action: "save_coords",
+        template_id: selectedTemplateId,
+        name_x: parseFloat(document.getElementById("sliderNameX").value) / 100,
+        name_y: parseFloat(document.getElementById("sliderNameY").value) / 100,
+        course_x: parseFloat(document.getElementById("sliderCourseX").value) / 100,
+        course_y: parseFloat(document.getElementById("sliderCourseY").value) / 100,
+        date_x: parseFloat(document.getElementById("sliderDateX").value) / 100,
+        date_y: parseFloat(document.getElementById("sliderDateY").value) / 100,
+        show_course: document.getElementById("checkShowCourse").checked,
+        show_date: document.getElementById("checkShowDate").checked,
+      };
+
+      if (previewWs && previewWs.readyState === WebSocket.OPEN) {
+        previewWs.send(JSON.stringify(payload));
+      }
+
+      try {
+        const res = await fetch(`/api/v1/templates/${encodeURIComponent(selectedTemplateId)}/layout`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name_x_ratio: payload.name_x,
+            name_y_ratio: payload.name_y,
+            course_x_ratio: payload.course_x,
+            course_y_ratio: payload.course_y,
+            date_x_ratio: payload.date_x,
+            date_y_ratio: payload.date_y,
+            show_course: payload.show_course,
+            show_date: payload.show_date,
+          }),
+        });
+        if (!res.ok) throw new Error("Failed to save layout via API");
+        const updatedTmpl = await res.json();
+        if (status) {
+          status.textContent = `Layout saved for '${updatedTmpl.name}'!`;
+          status.style.color = "#166534";
+        }
+        const idx = loadedTemplatesList.findIndex(t => t.id === selectedTemplateId);
+        if (idx !== -1) loadedTemplatesList[idx] = updatedTmpl;
+        setTimeout(() => { if (status) status.textContent = ""; }, 4000);
+      } catch (err) {
+        if (status) {
+          status.textContent = err.message;
+          status.style.color = "#991b1b";
+        }
+      }
+    }
+
+    function resetToAutoDetectedLayout() {
+      const tmpl = loadedTemplatesList.find(t => t.id === selectedTemplateId || t.name === selectedTemplateId);
+      const isPreprinted = tmpl && tmpl.overlay_mode === "preprinted";
+      document.getElementById("sliderNameX").value = 50.0;
+      document.getElementById("sliderNameY").value = isPreprinted ? 55.8 : 51.5;
+      document.getElementById("sliderCourseX").value = isPreprinted ? 56.2 : 50.0;
+      document.getElementById("sliderCourseY").value = isPreprinted ? 46.6 : 42.0;
+      document.getElementById("sliderDateX").value = isPreprinted ? 58.5 : 50.0;
+      document.getElementById("sliderDateY").value = isPreprinted ? 33.4 : 33.0;
+      document.getElementById("checkShowCourse").checked = true;
+      document.getElementById("checkShowDate").checked = true;
+      onSliderMove();
     }
 
     async function loadTemplates() {
@@ -233,6 +638,7 @@
         const res = await fetch("/api/v1/templates");
         if (!res.ok) throw new Error("Failed to load templates");
         const templates = await res.json();
+        loadedTemplatesList = templates;
         grid.innerHTML = "";
 
         if (!templates.length) {
@@ -288,6 +694,9 @@
           `;
           grid.appendChild(div);
         });
+
+        // Synchronize selected template with positioner
+        selectTemplate(selectedTemplateId);
       } catch (err) {
         console.error("Load templates error:", err);
         grid.innerHTML = `<div style="grid-column: 1 / -1; color: var(--error); padding: 1rem;">Failed to load templates. <button class="btn btn-secondary btn-sm" onclick="loadTemplates()">Retry</button></div>`;
@@ -388,7 +797,8 @@
       }
     }
 
-    // Load saved templates on startup
+    // Initialize preview WebSocket and load saved templates on startup
+    initPreviewWebSocket();
     loadTemplates();
 
     function loadSampleData(count) {

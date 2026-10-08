@@ -138,6 +138,7 @@ def generate_certificate(
     custom_template_path: str | None = None,
     overlay_mode: str = "full",
     name_y_ratio: float = 0.515,
+    name_x_ratio: float = 0.5,
     course_y_ratio: float | None = None,
     course_x_ratio: float | None = None,
     date_y_ratio: float | None = None,
@@ -234,6 +235,7 @@ def generate_certificate(
                     page_width=page_width,
                     page_height=page_height,
                     name_y_ratio=name_y_ratio,
+                    name_x_ratio=name_x_ratio,
                     course_y_ratio=course_y_ratio,
                     course_x_ratio=course_x_ratio,
                     date_y_ratio=date_y_ratio,
@@ -321,6 +323,7 @@ def generate_certificate(
                 page_width=page_width,
                 page_height=page_height,
                 name_y_ratio=name_y_ratio,
+                name_x_ratio=name_x_ratio,
                 course_y_ratio=course_y_ratio,
                 course_x_ratio=course_x_ratio,
                 date_y_ratio=date_y_ratio,
@@ -608,6 +611,7 @@ def _draw_preprinted_custom_content(
     page_width: float,
     page_height: float,
     name_y_ratio: float = 0.558,
+    name_x_ratio: float = 0.5,
     course_y_ratio: float | None = None,
     course_x_ratio: float | None = None,
     date_y_ratio: float | None = None,
@@ -639,7 +643,8 @@ def _draw_preprinted_custom_content(
     c.setFont(font_bold, name_font_size)
     c.setFillColor(primary_col)
     name_y = page_height * (name_y_ratio if name_y_ratio is not None else 0.558)
-    c.drawCentredString(center_x, name_y, recipient_name)
+    name_x = page_width * (name_x_ratio if name_x_ratio is not None else 0.5)
+    c.drawCentredString(name_x, name_y, recipient_name)
 
     # 2. Course Name: sitting on underline, sized so it never collides with labels
     if show_course and course_y_ratio is not None and course_name:

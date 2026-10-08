@@ -105,6 +105,7 @@ class TemplateResponse(BaseModel):
     is_builtin: bool
     overlay_mode: Optional[str] = "full"
     name_y_ratio: Optional[float] = 0.515
+    name_x_ratio: Optional[float] = 0.5
     course_y_ratio: Optional[float] = None
     course_x_ratio: Optional[float] = None
     date_y_ratio: Optional[float] = None
@@ -114,6 +115,18 @@ class TemplateResponse(BaseModel):
     font_family: Optional[str] = "sans"
     primary_color: Optional[str] = "#1E293B"
     accent_color: Optional[str] = "#2E86AB"
+
+
+class TemplateLayoutUpdate(BaseModel):
+    """Schema for updating template layout coordinates and visibility."""
+    name_x_ratio: Optional[float] = 0.5
+    name_y_ratio: Optional[float] = 0.515
+    course_x_ratio: Optional[float] = None
+    course_y_ratio: Optional[float] = None
+    date_x_ratio: Optional[float] = None
+    date_y_ratio: Optional[float] = None
+    show_course: Optional[bool] = True
+    show_date: Optional[bool] = True
 
 
 class CertificateResponse(BaseModel):

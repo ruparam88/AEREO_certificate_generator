@@ -111,6 +111,7 @@ def process_job(job_id: str) -> None:
         )
         overlay_mode = getattr(template, "overlay_mode", "full") or ("preprinted" if custom_template_path else "full")
         name_y_ratio = getattr(template, "name_y_ratio", 0.515) or 0.515
+        name_x_ratio = getattr(template, "name_x_ratio", 0.5) or 0.5
         course_y_ratio = getattr(template, "course_y_ratio", None)
         course_x_ratio = getattr(template, "course_x_ratio", None)
         date_y_ratio = getattr(template, "date_y_ratio", None)
@@ -143,6 +144,7 @@ def process_job(job_id: str) -> None:
                     custom_template_path=custom_template_path,
                     overlay_mode=overlay_mode,
                     name_y_ratio=name_y_ratio,
+                    name_x_ratio=name_x_ratio,
                     course_y_ratio=course_y_ratio,
                     course_x_ratio=course_x_ratio,
                     date_y_ratio=date_y_ratio,

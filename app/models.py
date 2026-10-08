@@ -65,6 +65,7 @@ class Template(Base):
     is_builtin = Column(Integer, default=1)  # 1 = built-in, 0 = user-uploaded
     overlay_mode = Column(String(50), default="full")  # "full" or "preprinted"
     name_y_ratio = Column(Float, default=0.515)  # Y position of name from bottom (fraction)
+    name_x_ratio = Column(Float, default=0.5)    # X position of name from left (fraction)
     course_y_ratio = Column(Float, nullable=True)  # Y position of course name from bottom
     course_x_ratio = Column(Float, nullable=True)  # X position of course name from left
     date_y_ratio = Column(Float, nullable=True)  # Y position of date from bottom

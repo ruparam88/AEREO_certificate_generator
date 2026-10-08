@@ -13,21 +13,9 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env")
 
-    database_url: str = (
-        "sqlite:////tmp/certificates.db"
-        if os.getenv("VERCEL")
-        else "sqlite:///./certificates.db"
-    )
-    certificates_dir: str = (
-        "/tmp/generated_certificates"
-        if os.getenv("VERCEL")
-        else "generated_certificates"
-    )
-    uploaded_templates_dir: str = (
-        "/tmp/uploaded_templates"
-        if os.getenv("VERCEL")
-        else "uploaded_templates"
-    )
+    database_url: str = "sqlite:///./certificates.db"
+    certificates_dir: str = "generated_certificates"
+    uploaded_templates_dir: str = "uploaded_templates"
     max_recipients_per_job: int = 10000
 
 

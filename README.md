@@ -17,13 +17,11 @@ A high-performance FastAPI service to generate PDF certificates in bulk with cus
 
 ## Feature Status & Roadmap
 
-| Feature | Status | Description |
-|---|---|---|
-| **1. Upload Custom Template** | Completed | Upload user-designed backgrounds in PNG, JPEG, or PDF formats |
-| **2. Individual & Bulk Downloads** | Completed | Download single certificates as PDF or all certificates as a ZIP archive |
-| **3. Excel / CSV File Upload** | Completed | Upload Excel spreadsheets (.xlsx) or CSV files to generate certificates in bulk |
-| **4. Font & Color Selection** | Planned | Select custom font styles and colors for certificate text |
-| **5. Live Certificate Preview** | Planned | Real-time preview showing how font style, size, and color look before generating |
+- $\color{#0969da}{\mathbf{\checkmark}}$ **1. Upload Custom Template**: Upload user-designed backgrounds in PNG, JPEG, or PDF formats
+- $\color{#0969da}{\mathbf{\checkmark}}$ **2. Individual & Bulk Downloads**: Download single certificates as PDF or all certificates as a ZIP archive
+- $\color{#0969da}{\mathbf{\checkmark}}$ **3. Excel / CSV File Upload**: Upload Excel spreadsheets (.xlsx) or CSV files to generate certificates in bulk
+- $\square$ **4. Font & Color Selection**: Select custom font styles and colors for certificate text
+- $\square$ **5. Live Certificate Preview**: Real-time preview showing how font style, size, and color look before generating
 
 ## Tech Stack
 

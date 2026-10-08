@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bulk Certificate Generator</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --success: #16a34a;
+      --error: #dc2626;
+      --gray-50: #f8fafc;
+      --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0;
+      --gray-300: #cbd5e1;
+      --gray-700: #334155;
+      --gray-800: #1e293b;
+      --gray-900: #0f172a;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--gray-50); color: var(--gray-800); padding: 2rem 1rem; }
+    .container { max-width: 900px; margin: 0 auto; }
+    
+    header { margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--gray-200); padding-bottom: 1rem; }
+    header h1 { font-size: 1.75rem; color: var(--gray-900); }
+    header .links a { color: var(--primary); text-decoration: none; font-size: 0.9rem; font-weight: 500; margin-left: 1rem; }
+    header .links a:hover { text-decoration: underline; }
+
+    .card { background: white; border-radius: 8px; border: 1px solid var(--gray-200); padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .card h2 { font-size: 1.25rem; margin-bottom: 1rem; color: var(--gray-900); }
+    
+    .template-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+    .template-card { position: relative; border: 2px solid var(--gray-200); border-radius: 6px; padding: 1rem; cursor: pointer; transition: all 0.2s; text-align: left; }
+    .template-card:hover { border-color: var(--primary); }
+    .template-card.active { border-color: var(--primary); background-color: #eff6ff; }
+    .template-card h3 { font-size: 1rem; text-transform: capitalize; margin-bottom: 0.25rem; }
+    .template-card p { font-size: 0.8rem; color: var(--gray-700); }
+    .btn-delete-template { background: none; border: none; cursor: pointer; font-size: 0.95rem; padding: 2px 6px; border-radius: 4px; color: var(--gray-700); transition: all 0.15s; }
+    .btn-delete-template:hover { background: #fee2e2; color: var(--error); }
+
+    .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; font-size: 0.875rem; font-weight: 500; border-radius: 6px; cursor: pointer; border: none; text-decoration: none; transition: background 0.15s; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-secondary { background: var(--gray-100); color: var(--gray-800); border: 1px solid var(--gray-300); }
+    .btn-secondary:hover { background: var(--gray-200); }
+    .btn-success { background: var(--success); color: white; }
+    .btn-success:hover { background: #15803d; }
+    .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.8rem; }
+
+    textarea { width: 100%; height: 180px; padding: 0.75rem; border: 1px solid var(--gray-300); border-radius: 6px; font-family: monospace; font-size: 0.85rem; margin-bottom: 0.5rem; }
+    .btn-group { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+
+    /* Results section */
+    .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--gray-200); }
+    .results-header-left { display: flex; align-items: center; gap: 1rem; }
+    .badge { padding: 0.25rem 0.6rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+    .badge-pending { background: #fef3c7; color: #92400e; }
+    .badge-processing { background: #e0e7ff; color: #3730a3; }
+    .badge-completed { background: #dcfce7; color: #166534; }
+    .badge-failed { background: #fee2e2; color: #991b1b; }
+
+    .cert-list { display: flex; flex-direction: column; gap: 0.75rem; }
+    .cert-row { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; border: 1px solid var(--gray-200); border-radius: 6px; background: white; }
+    .cert-left-actions { display: flex; align-items: center; gap: 1rem; }
+    .cert-details { display: flex; flex-direction: column; }
+    .cert-name { font-weight: 600; font-size: 0.95rem; }
+    .cert-sub { font-size: 0.8rem; color: var(--gray-700); }
+
+    .upload-box { border: 1px dashed var(--gray-300); padding: 1rem; border-radius: 6px; margin-top: 1rem; }
+    .upload-box input { margin-bottom: 0.5rem; }
+    .progress-bar { width: 100%; height: 6px; background: var(--gray-200); border-radius: 3px; overflow: hidden; margin-top: 0.5rem; }
+    .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>🎓 Bulk Certificate Generator</h1>
+        <p style="font-size: 0.875rem; color: var(--gray-700);">Generate high-resolution PDF certificates in bulk with customizable templates</p>
+      </div>
+      <div class="links">
+        <a href="/docs" target="_blank">Swagger API Docs ↗</a>
+      </div>
+    </header>
+
+    <!-- STEP 1: TEMPLATE SELECTION -->
+    <div class="card">
+      <h2>1. Select or Upload Certificate Template</h2>
+      <div class="template-grid" id="templateGrid">
+        <div style="grid-column: 1 / -1; padding: 1rem; color: var(--gray-700); text-align: center;">Loading templates from database...</div>
+      </div>
+
+      <!-- Upload Custom Template Form -->
+      <details style="font-size: 0.9rem;">
+        <summary style="cursor: pointer; color: var(--primary); font-weight: 500;">+ Upload Custom Template (PNG, JPEG, PDF)</summary>
+        <div class="upload-box">
+          <input type="text" id="customTemplateName" placeholder="Template Name (e.g. Borcelle_Award)" style="width: 100%; padding: 0.4rem; margin-bottom: 0.5rem; border: 1px solid var(--gray-300); border-radius: 4px;">
+          <input type="file" id="customTemplateFile" accept="image/png,image/jpeg,application/pdf">
+          
+          <div style="margin: 0.75rem 0; font-size: 0.85rem; background: var(--gray-50); padding: 0.5rem; border-radius: 4px; border: 1px solid var(--gray-200);">
+            <div style="font-weight: 600; margin-bottom: 0.25rem; color: var(--gray-800);">Template Type:</div>
+            <label style="display: block; margin-bottom: 0.25rem; cursor: pointer;">
+              <input type="radio" name="uploadOverlayMode" value="preprinted" checked>
+              <strong>Pre-printed Design</strong> (Template already has titles & signatures; automatically overlays recipient, course & date)
+            </label>
+            <label style="display: block; cursor: pointer;">
+              <input type="radio" name="uploadOverlayMode" value="full">
+              <strong>Blank Border Frame</strong> (Draw full title "Certificate of Completion", course, date & signatures)
+            </label>
+            <label style="display: flex; align-items: center; gap: 0.4rem; margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--gray-200); cursor: pointer;">
+              <input type="checkbox" id="customTemplateOverwrite">
+              <span><strong>Overwrite if template name exists</strong> (replaces existing version instead of rejecting)</span>
+            </label>
+
+            <!-- Typography & Color Alignment -->
+            <div style="margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px dashed var(--gray-300);">
+              <div style="font-weight: 600; margin-bottom: 0.35rem; color: var(--gray-800); font-size: 0.8rem;">🎨 Typography & Color Matching:</div>
+              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 140px;">
+                  <label style="font-size: 0.75rem; color: var(--gray-600); display: block;">Font Style:</label>
+                  <select id="customTemplateFont" style="width: 100%; padding: 0.3rem; border: 1px solid var(--gray-300); border-radius: 4px; font-size: 0.8rem;">
+                    <option value="">Auto-detect from template</option>
+                    <option value="sans">Modern Sans-Serif (Segoe UI / Helvetica)</option>
+                    <option value="serif">Classical Serif (Georgia / Times)</option>
+                    <option value="elegant">Executive Luxury (Palatino / Gold)</option>
+                  </select>
+                </div>
+                <div style="width: 110px;">
+                  <label style="font-size: 0.75rem; color: var(--gray-600); display: block;">Primary Text Color:</label>
+                  <input type="text" id="customTemplateColor" placeholder="Auto (e.g. #0A001D)" style="width: 100%; padding: 0.3rem; border: 1px solid var(--gray-300); border-radius: 4px; font-size: 0.8rem;">
+                </div>
+                <div style="width: 110px;">
+                  <label style="font-size: 0.75rem; color: var(--gray-600); display: block;">Accent Color:</label>
+                  <input type="text" id="customTemplateAccent" placeholder="Auto (e.g. #609AAD)" style="width: 100%; padding: 0.3rem; border: 1px solid var(--gray-300); border-radius: 4px; font-size: 0.8rem;">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+            <div>
+              <button class="btn btn-secondary btn-sm" onclick="uploadCustomTemplate()">Upload Template</button>
+              <span id="uploadStatus" style="font-size: 0.8rem; margin-left: 0.5rem;"></span>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="clearAllCustomTemplates()" style="color: #dc2626; border-color: #fca5a5;">
+              🗑️ Clear All Custom Templates
+            </button>
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <!-- STEP 2: RECIPIENTS INPUT -->
+    <div class="card">
+      <h2>2. Recipients Data (JSON)</h2>
+      <div class="btn-group">
+        <button class="btn btn-secondary btn-sm" onclick="loadSampleData(3)">Load 3 Sample Recipients</button>
+        <button class="btn btn-secondary btn-sm" onclick="loadSampleData(10)">Load 10 Recipients</button>
+        <button class="btn btn-secondary btn-sm" onclick="loadSampleWithInvalid()">Load Sample (With 1 Invalid)</button>
+      </div>
+      <textarea id="recipientsJson"></textarea>
+      <button class="btn btn-primary" id="btnGenerate" onclick="startGeneration()">
+        🚀 Generate Certificates
+      </button>
+    </div>
+
+    <!-- STEP 3: RESULTS DISPLAY -->
+    <div class="card" id="resultsCard" style="display: none;">
+      <div class="results-header">
+        <div class="results-header-left">
+          <h2>Generation Results</h2>
+          <span id="jobStatusBadge" class="badge badge-pending">PENDING</span>
+          <span id="jobCounts" style="font-size: 0.85rem; color: var(--gray-700);"></span>
+        </div>
+        <!-- TOP RIGHT: DOWNLOAD ALL (ZIP) BUTTON -->
+        <a id="btnDownloadAll" class="btn btn-success" href="#" style="display: none;" download>
+          📦 Download All (ZIP)
+        </a>
+      </div>
+
+      <div class="progress-bar" id="progressBar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+
+      <div class="cert-list" id="certList" style="margin-top: 1.5rem;">
+        <!-- Rows populated dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let selectedTemplateId = "classic";
+    let activeJobId = null;
+    let pollInterval = null;
+
+    function escapeHtml(str) {
+      if (!str) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function selectTemplate(id) {
+      selectedTemplateId = id;
+      document.querySelectorAll(".template-card").forEach(c => c.classList.remove("active"));
+      const card = document.querySelector(`.template-card[data-id="${id}"]`);
+      if (card) card.classList.add("active");
+    }
+
+    async function loadTemplates() {
+      const grid = document.getElementById("templateGrid");
+      try {
+        const res = await fetch("/api/v1/templates");
+        if (!res.ok) throw new Error("Failed to load templates");
+        const templates = await res.json();
+        grid.innerHTML = "";
+
+        if (!templates.length) {
+          grid.innerHTML = `<div style="grid-column: 1 / -1; padding: 1rem; color: var(--gray-700); text-align: center;">No templates found.</div>`;
+          return;
+        }
+
+        // Keep existing selection if valid, else pick first available
+        if (!templates.some(t => t.id === selectedTemplateId)) {
+          selectedTemplateId = templates[0].id;
+        }
+
+        templates.forEach(t => {
+          const div = document.createElement("div");
+          const isActive = t.id === selectedTemplateId;
+          div.className = `template-card${isActive ? " active" : ""}`;
+          div.dataset.id = t.id;
+          div.onclick = (e) => {
+            if (e.target.closest(".btn-delete-template")) return;
+            selectTemplate(t.id);
+          };
+
+          let desc = t.description || "";
+          if (!t.is_builtin) {
+            const mode = t.overlay_mode === "preprinted" ? "Pre-printed Design" : "Blank Frame (Full)";
+            desc = `${mode} • Custom Template`;
+          }
+
+          const fontBadge = t.font_family ? `<span style="font-size: 0.7rem; color: var(--gray-700); background: var(--gray-100); border: 1px solid var(--gray-300); padding: 1px 5px; border-radius: 3px;">🔤 ${escapeHtml(t.font_family)}</span>` : '';
+          const colorBadge = t.primary_color ? `
+            <span style="display: inline-flex; align-items: center; gap: 3px; font-size: 0.7rem; color: var(--gray-700);">
+              <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: ${escapeHtml(t.primary_color)}; border: 1px solid #999;"></span>
+              <span>${escapeHtml(t.primary_color)}</span>
+            </span>
+          ` : '';
+
+          div.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.35rem; gap: 0.5rem;">
+              <h3 style="margin: 0; font-size: 1rem; line-height: 1.2;">${escapeHtml(t.name)}</h3>
+              ${!t.is_builtin ? `
+                <button class="btn-delete-template" title="Delete template" onclick="deleteTemplate('${escapeHtml(t.id)}', '${escapeHtml(t.name)}', event)">
+                  🗑️
+                </button>
+              ` : `
+                <span style="font-size: 0.7rem; color: var(--gray-700); background: var(--gray-200); padding: 1px 6px; border-radius: 4px; white-space: nowrap;">Built-in</span>
+              `}
+            </div>
+            <p style="font-size: 0.8rem; color: var(--gray-700); margin: 0 0 0.35rem 0;">${escapeHtml(desc)}</p>
+            <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+              ${fontBadge}
+              ${colorBadge}
+            </div>
+          `;
+          grid.appendChild(div);
+        });
+      } catch (err) {
+        console.error("Load templates error:", err);
+        grid.innerHTML = `<div style="grid-column: 1 / -1; color: var(--error); padding: 1rem;">Failed to load templates. <button class="btn btn-secondary btn-sm" onclick="loadTemplates()">Retry</button></div>`;
+      }
+    }
+
+    async function deleteTemplate(id, name, event) {
+      if (event) event.stopPropagation();
+      if (!confirm(`Are you sure you want to delete template "${name}"?`)) return;
+
+      try {
+        const res = await fetch(`/api/v1/templates/${id}`, { method: "DELETE" });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || "Failed to delete template");
+        }
+        if (selectedTemplateId === id) {
+          selectedTemplateId = "classic";
+        }
+        await loadTemplates();
+      } catch (err) {
+        alert("Error deleting template: " + err.message);
+      }
+    }
+
+    async function clearAllCustomTemplates() {
+      if (!confirm("Are you sure you want to clear ALL custom uploaded templates? Built-in templates will remain.")) return;
+
+      try {
+        const res = await fetch("/api/v1/templates/custom/clear-all", { method: "DELETE" });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || "Failed to clear templates");
+        }
+        const data = await res.json();
+        alert(data.message);
+        selectedTemplateId = "classic";
+        await loadTemplates();
+      } catch (err) {
+        alert("Error clearing custom templates: " + err.message);
+      }
+    }
+
+    async function uploadCustomTemplate() {
+      const name = document.getElementById("customTemplateName").value.trim();
+      const fileInput = document.getElementById("customTemplateFile");
+      const status = document.getElementById("uploadStatus");
+      const overlayMode = document.querySelector('input[name="uploadOverlayMode"]:checked').value;
+      const overwrite = document.getElementById("customTemplateOverwrite").checked;
+
+      if (!name || !fileInput.files.length) {
+        status.textContent = "Please provide both name and a file";
+        status.style.color = "red";
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("file", fileInput.files[0]);
+      formData.append("overlay_mode", overlayMode);
+      formData.append("overwrite", overwrite ? "true" : "false");
+
+      const customFont = document.getElementById("customTemplateFont")?.value?.trim();
+      if (customFont) formData.append("font_family", customFont);
+
+      const customColor = document.getElementById("customTemplateColor")?.value?.trim();
+      if (customColor) formData.append("primary_color", customColor);
+
+      const customAccent = document.getElementById("customTemplateAccent")?.value?.trim();
+      if (customAccent) formData.append("accent_color", customAccent);
+
+      try {
+        status.textContent = "Uploading...";
+        status.style.color = "blue";
+        const res = await fetch("/api/v1/templates/upload", { method: "POST", body: formData });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || "Upload failed");
+        }
+        const data = await res.json();
+        status.textContent = `Uploaded! Selected: ${data.name}`;
+        status.style.color = "green";
+        selectedTemplateId = data.id;
+
+        // Reset form inputs
+        document.getElementById("customTemplateName").value = "";
+        document.getElementById("customTemplateFile").value = "";
+        document.getElementById("customTemplateOverwrite").checked = false;
+        if (document.getElementById("customTemplateFont")) document.getElementById("customTemplateFont").value = "";
+        if (document.getElementById("customTemplateColor")) document.getElementById("customTemplateColor").value = "";
+        if (document.getElementById("customTemplateAccent")) document.getElementById("customTemplateAccent").value = "";
+
+        // Refresh template grid from database
+        await loadTemplates();
+      } catch (err) {
+        status.textContent = err.message;
+        status.style.color = "red";
+      }
+    }
+
+    // Load saved templates on startup
+    loadTemplates();
+
+    function loadSampleData(count) {
+      const names = ["Alice Johnson", "Bob Smith", "Charlie Brown", "Diana Prince", "Evan Wright", 
+                     "Fiona Gallagher", "George Clark", "Hannah Abbott", "Ian Malcolm", "Julia Roberts"];
+      const recipients = [];
+      for (let i = 0; i < count; i++) {
+        recipients.push({
+          name: names[i % names.length],
+          email: `${names[i % names.length].toLowerCase().replace(" ", ".")}@example.com`,
+          course_name: "FastAPI & Microservices Masterclass",
+          date: "2024-12-15"
+        });
+      }
+      document.getElementById("recipientsJson").value = JSON.stringify(recipients, null, 2);
+    }
+
+    function loadSampleWithInvalid() {
+      const data = [
+        { name: "Valid Recipient One", email: "one@example.com", course_name: "Cloud Architecture", date: "2024-12-15" },
+        { name: "Valid Recipient Two", email: "two@example.com", course_name: "Cloud Architecture", date: "2024-12-15" }
+      ];
+      document.getElementById("recipientsJson").value = JSON.stringify(data, null, 2);
+    }
+
+    // Default load
+    loadSampleData(3);
+
+    async function startGeneration() {
+      const jsonText = document.getElementById("recipientsJson").value.trim();
+      let recipients;
+      try {
+        recipients = JSON.parse(jsonText);
+      } catch (e) {
+        alert("Invalid JSON format for recipients: " + e.message);
+        return;
+      }
+
+      const payload = {
+        template_id: selectedTemplateId,
+        recipients: recipients
+      };
+
+      const btn = document.getElementById("btnGenerate");
+      btn.disabled = true;
+      btn.textContent = "Submitting Job...";
+
+      try {
+        const res = await fetch("/api/v1/jobs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(JSON.stringify(err.detail || err));
+        }
+
+        const job = await res.json();
+        activeJobId = job.id;
+
+        // Show results section
+        document.getElementById("resultsCard").style.display = "block";
+        document.getElementById("progressFill").style.width = "30%";
+        updateStatusBadge(job.status);
+
+        // Start polling
+        if (pollInterval) clearInterval(pollInterval);
+        pollInterval = setInterval(pollJobStatus, 800);
+      } catch (err) {
+        alert("Error creating job: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "🚀 Generate Certificates";
+      }
+    }
+
+    async function pollJobStatus() {
+      if (!activeJobId) return;
+
+      try {
+        const res = await fetch(`/api/v1/jobs/${activeJobId}`);
+        if (!res.ok) return;
+        const job = await res.json();
+
+        updateStatusBadge(job.status);
+        document.getElementById("jobCounts").textContent = 
+          `Processed: ${job.successful_count + job.failed_count} / ${job.total_recipients} (Success: ${job.successful_count}, Failed: ${job.failed_count})`;
+
+        if (job.status === "completed") {
+          document.getElementById("progressFill").style.width = "100%";
+          clearInterval(pollInterval);
+
+          // Top right: Show Download All (ZIP) button
+          const btnAll = document.getElementById("btnDownloadAll");
+          btnAll.href = `/api/v1/jobs/${job.id}/download-all`;
+          btnAll.style.display = "inline-flex";
+
+          renderCertificates(job.certificates);
+        } else if (job.status === "processing") {
+          const pct = Math.max(30, Math.floor(((job.successful_count + job.failed_count) / job.total_recipients) * 100));
+          document.getElementById("progressFill").style.width = `${pct}%`;
+        }
+      } catch (e) {
+        console.error("Poll error:", e);
+      }
+    }
+
+    function updateStatusBadge(status) {
+      const badge = document.getElementById("jobStatusBadge");
+      badge.textContent = status.toUpperCase();
+      badge.className = `badge badge-${status}`;
+    }
+
+    function renderCertificates(certs) {
+      const list = document.getElementById("certList");
+      list.innerHTML = "";
+
+      certs.forEach(cert => {
+        const row = document.createElement("div");
+        row.className = "cert-row";
+
+        // LEFT SIDE: Download button + Details
+        const isSuccess = cert.status === "success";
+        row.innerHTML = `
+          <div class="cert-left-actions">
+            ${isSuccess 
+              ? `<a class="btn btn-primary btn-sm" href="${cert.download_url}" download="certificate_${cert.recipient_name.replace(/ /g, '_')}.pdf">
+                   📥 Download PDF
+                 </a>`
+              : `<button class="btn btn-secondary btn-sm" disabled style="color: var(--error);">
+                   ❌ Failed
+                 </button>`
+            }
+            <div class="cert-details">
+              <span class="cert-name">${cert.recipient_name}</span>
+              <span class="cert-sub">${cert.course_name} • ${cert.date} ${cert.recipient_email ? `(${cert.recipient_email})` : ""}</span>
+              ${cert.error_message ? `<span style="color: var(--error); font-size: 0.75rem;">${cert.error_message}</span>` : ""}
+            </div>
+          </div>
+          <div>
+            <span class="badge badge-${cert.status}">${cert.status}</span>
+          </div>
+        `;
+        list.appendChild(row);
+      });
+    }
+  </script>
+</body>
+</html>

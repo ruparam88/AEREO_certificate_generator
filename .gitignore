@@ -1,0 +1,55 @@
+# Python bytecode and cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+certificates.db
+test_certificates.db
+
+# Generated certificates & user uploads at runtime
+generated_certificates/
+uploaded_templates/
+outputs/*.pdf
+
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Packaging & Distribution
+dist/
+build/
+*.egg-info/
+*.egg
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-workspace
+*.sublime-project
+
+# Operating System files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+USER.md

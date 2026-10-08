@@ -1,0 +1,15 @@
+version: "3.8"
+
+services:
+  web:
+    build: .
+    container_name: certificate-generator
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./generated_certificates:/app/generated_certificates
+      - ./uploaded_templates:/app/uploaded_templates
+      - ./certificates.db:/app/certificates.db
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped

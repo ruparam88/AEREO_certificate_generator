@@ -78,7 +78,7 @@
   <div class="container">
     <header>
       <div>
-        <h1>🎓 Bulk Certificate Generator</h1>
+        <h1>Bulk Certificate Generator</h1>
         <p style="font-size: 0.875rem; color: var(--gray-700);">Generate high-resolution PDF certificates in bulk with customizable templates</p>
       </div>
       <div class="links">
@@ -117,7 +117,7 @@
 
             <!-- Typography & Color Alignment -->
             <div style="margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px dashed var(--gray-300);">
-              <div style="font-weight: 600; margin-bottom: 0.35rem; color: var(--gray-800); font-size: 0.8rem;">🎨 Typography & Color Matching:</div>
+              <div style="font-weight: 600; margin-bottom: 0.35rem; color: var(--gray-800); font-size: 0.8rem;">Typography & Color Matching:</div>
               <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                 <div style="flex: 1; min-width: 140px;">
                   <label style="font-size: 0.75rem; color: var(--gray-600); display: block;">Font Style:</label>
@@ -146,7 +146,7 @@
               <span id="uploadStatus" style="font-size: 0.8rem; margin-left: 0.5rem;"></span>
             </div>
             <button class="btn btn-secondary btn-sm" onclick="clearAllCustomTemplates()" style="color: #dc2626; border-color: #fca5a5;">
-              🗑️ Clear All Custom Templates
+              Clear All Custom Templates
             </button>
           </div>
         </div>
@@ -159,11 +159,11 @@
         <h2 style="margin: 0;">2. Recipients Data (JSON or Spreadsheet)</h2>
         <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
           <label class="btn btn-secondary btn-sm" style="margin: 0; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;">
-            <span>📁 Upload Spreadsheet (.xlsx, .csv)</span>
+            <span>Upload Spreadsheet (.xlsx, .csv)</span>
             <input type="file" id="spreadsheetFileInput" accept=".xlsx,.xls,.csv" style="display: none;" onchange="handleSpreadsheetUpload(event)">
           </label>
           <button class="btn btn-secondary btn-sm" onclick="downloadSampleCsv()" title="Download sample CSV template">
-            ⬇️ Sample CSV
+            Sample CSV
           </button>
         </div>
       </div>
@@ -177,7 +177,7 @@
       </div>
       <textarea id="recipientsJson"></textarea>
       <button class="btn btn-primary" id="btnGenerate" onclick="startGeneration()">
-        🚀 Generate Certificates
+        Generate Certificates
       </button>
     </div>
 
@@ -191,7 +191,7 @@
         </div>
         <!-- TOP RIGHT: DOWNLOAD ALL (ZIP) BUTTON -->
         <a id="btnDownloadAll" class="btn btn-success" href="#" style="display: none;" download>
-          📦 Download All (ZIP)
+          Download All (ZIP)
         </a>
       </div>
 
@@ -261,7 +261,7 @@
             desc = `${mode} • Custom Template`;
           }
 
-          const fontBadge = t.font_family ? `<span style="font-size: 0.7rem; color: var(--gray-700); background: var(--gray-100); border: 1px solid var(--gray-300); padding: 1px 5px; border-radius: 3px;">🔤 ${escapeHtml(t.font_family)}</span>` : '';
+          const fontBadge = t.font_family ? `<span style="font-size: 0.7rem; color: var(--gray-700); background: var(--gray-100); border: 1px solid var(--gray-300); padding: 1px 5px; border-radius: 3px;">Font: ${escapeHtml(t.font_family)}</span>` : '';
           const colorBadge = t.primary_color ? `
             <span style="display: inline-flex; align-items: center; gap: 3px; font-size: 0.7rem; color: var(--gray-700);">
               <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: ${escapeHtml(t.primary_color)}; border: 1px solid #999;"></span>
@@ -274,7 +274,7 @@
               <h3 style="margin: 0; font-size: 1rem; line-height: 1.2;">${escapeHtml(t.name)}</h3>
               ${!t.is_builtin ? `
                 <button class="btn-delete-template" title="Delete template" onclick="deleteTemplate('${escapeHtml(t.id)}', '${escapeHtml(t.name)}', event)">
-                  🗑️
+                  &times;
                 </button>
               ` : `
                 <span style="font-size: 0.7rem; color: var(--gray-700); background: var(--gray-200); padding: 1px 6px; border-radius: 4px; white-space: nowrap;">Built-in</span>
@@ -423,7 +423,7 @@
       statusEl.style.background = "#eff6ff";
       statusEl.style.color = "#1e40af";
       statusEl.style.border = "1px solid #bfdbfe";
-      statusEl.innerHTML = `⏳ Parsing spreadsheet <strong>${escapeHtml(file.name)}</strong>...`;
+      statusEl.innerHTML = `Parsing spreadsheet <strong>${escapeHtml(file.name)}</strong>...`;
 
       const formData = new FormData();
       formData.append("file", file);
@@ -445,12 +445,12 @@
         statusEl.style.background = "#dcfce7";
         statusEl.style.color = "#166534";
         statusEl.style.border = "1px solid #bbf7d0";
-        statusEl.innerHTML = `✅ Successfully loaded <strong>${recipients.length} recipients</strong> from <code>${escapeHtml(file.name)}</code>! Review or edit below, then click Generate.`;
+        statusEl.innerHTML = `Successfully loaded <strong>${recipients.length} recipients</strong> from <code>${escapeHtml(file.name)}</code>. Review or edit below, then click Generate.`;
       } catch (err) {
         statusEl.style.background = "#fee2e2";
         statusEl.style.color = "#991b1b";
         statusEl.style.border = "1px solid #fecaca";
-        statusEl.innerHTML = `❌ <strong>Spreadsheet Error:</strong> ${escapeHtml(err.message)}`;
+        statusEl.innerHTML = `<strong>Spreadsheet Error:</strong> ${escapeHtml(err.message)}`;
       } finally {
         event.target.value = "";
       }
@@ -523,7 +523,7 @@
         alert("Error creating job: " + err.message);
       } finally {
         btn.disabled = false;
-        btn.textContent = "🚀 Generate Certificates";
+        btn.textContent = "Generate Certificates";
       }
     }
 
@@ -578,10 +578,10 @@
           <div class="cert-left-actions">
             ${isSuccess 
               ? `<a class="btn btn-primary btn-sm" href="${cert.download_url}" download="certificate_${cert.recipient_name.replace(/ /g, '_')}.pdf">
-                   📥 Download PDF
+                   Download PDF
                  </a>`
               : `<button class="btn btn-secondary btn-sm" disabled style="color: var(--error);">
-                   ❌ Failed
+                   Failed
                  </button>`
             }
             <div class="cert-details">

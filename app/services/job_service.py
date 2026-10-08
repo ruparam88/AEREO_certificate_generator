@@ -121,6 +121,15 @@ def process_job(job_id: str) -> None:
         font_family = getattr(template, "font_family", "sans") or "sans"
         primary_color = getattr(template, "primary_color", None)
         accent_color = getattr(template, "accent_color", None)
+        name_font = getattr(template, "name_font", None)
+        name_size = getattr(template, "name_size", None)
+        name_color = getattr(template, "name_color", None)
+        course_font = getattr(template, "course_font", None)
+        course_size = getattr(template, "course_size", None)
+        course_color = getattr(template, "course_color", None)
+        date_font = getattr(template, "date_font", None)
+        date_size = getattr(template, "date_size", None)
+        date_color = getattr(template, "date_color", None)
 
         # Process each certificate independently
         certificates = (
@@ -154,6 +163,15 @@ def process_job(job_id: str) -> None:
                     font_family=font_family,
                     primary_color=primary_color,
                     accent_color=accent_color,
+                    name_font=name_font,
+                    name_size=name_size,
+                    name_color=name_color,
+                    course_font=course_font,
+                    course_size=course_size,
+                    course_color=course_color,
+                    date_font=date_font,
+                    date_size=date_size,
+                    date_color=date_color,
                 )
                 cert.status = CertificateStatus.SUCCESS
                 cert.file_path = file_path

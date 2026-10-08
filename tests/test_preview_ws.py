@@ -230,3 +230,130 @@ def test_generation_uses_calibrated_layout_coords(client: TestClient, tmp_path, 
     assert data["status"] == "completed"
     assert data["successful_count"] == 1
     assert data["failed_count"] == 0
+
+
+def test_websocket_update_coords_with_styling(client: TestClient):
+    """WebSocket update_coords should acknowledge styling attributes."""
+    with client.websocket_connect("/api/v1/ws/preview") as ws:
+        ws.send_json({
+            "action": "update_coords",
+            "template_id": "classic",
+            "name_x": 0.5,
+            "name_y": 0.55,
+            "course_x": 0.5,
+            "course_y": 0.42,
+            "date_x": 0.5,
+            "date_y": 0.33,
+            "name_font": "Cinzel",
+            "name_size": 38.0,
+            "name_color": "#1e3a8a",
+            "course_font": "Georgia",
+            "course_size": 18.0,
+            "course_color": "#047857",
+            "date_font": "Courier New",
+            "date_size": 14.0,
+            "date_color": "#b45309",
+        })
+        msg = ws.receive_json()
+        assert msg["action"] == "coords_updated"
+        coords = msg["coords"]
+        assert coords["name_font"] == "Cinzel"
+        assert coords["name_size"] == 38.0
+        assert coords["name_color"] == "#1e3a8a"
+        assert coords["course_font"] == "Georgia"
+        assert coords["course_size"] == 18.0
+        assert coords["course_color"] == "#047857"
+        assert coords["date_font"] == "Courier New"
+        assert coords["date_size"] == 14.0
+        assert coords["date_color"] == "#b45309"
+
+
+def test_websocket_save_coords_persists_styling_to_database(client: TestClient, db_session):
+    """WebSocket save_coords action should persist font, size, and color to database."""
+    tmpl = Template(
+        id="test-styling-tmpl",
+        name="test_styling_tmpl",
+        description="Template for styling test",
+        is_builtin=0,
+    )
+    db_session.add(tmpl)
+    db_session.commit()
+
+    with client.websocket_connect("/api/v1/ws/preview") as ws:
+        ws.send_json({
+            "action": "save_coords",
+            "template_id": "test-styling-tmpl",
+            "name_x": 0.50,
+            "name_y": 0.60,
+            "course_x": 0.52,
+            "course_y": 0.45,
+            "date_x": 0.55,
+            "date_y": 0.30,
+            "show_course": True,
+            "show_date": True,
+            "name_font": "Great Vibes",
+            "name_size": 42.0,
+            "name_color": "#7c2d12",
+            "course_font": "Palatino",
+            "course_size": 20.0,
+            "course_color": "#1e293b",
+            "date_font": "Verdana",
+            "date_size": 13.0,
+            "date_color": "#475569",
+        })
+        msg = ws.receive_json()
+        assert msg["action"] == "coords_saved"
+        assert msg["status"] == "ok"
+
+    # Verify directly in database
+    db_session.expire_all()
+    updated = db_session.query(Template).filter(Template.id == "test-styling-tmpl").first()
+    assert updated.name_font == "Great Vibes"
+    assert updated.name_size == 42.0
+    assert updated.name_color == "#7c2d12"
+    assert updated.course_font == "Palatino"
+    assert updated.course_size == 20.0
+    assert updated.course_color == "#1e293b"
+    assert updated.date_font == "Verdana"
+    assert updated.date_size == 13.0
+    assert updated.date_color == "#475569"
+
+
+def test_put_template_layout_updates_styling(client: TestClient, db_session):
+    """REST PUT /templates/{id}/layout should update and return all 9 styling fields."""
+    tmpl = Template(
+        id="test-put-styling-tmpl",
+        name="test_put_styling_tmpl",
+        is_builtin=0,
+    )
+    db_session.add(tmpl)
+    db_session.commit()
+
+    res = client.put(
+        "/api/v1/templates/test-put-styling-tmpl/layout",
+        json={
+            "name_x_ratio": 0.5,
+            "name_y_ratio": 0.55,
+            "name_font": "Trebuchet MS",
+            "name_size": 32.0,
+            "name_color": "#0f172a",
+            "course_font": "Garamond",
+            "course_size": 17.0,
+            "course_color": "#334155",
+            "date_font": "Courier New",
+            "date_size": 11.0,
+            "date_color": "#64748b",
+        },
+    )
+    assert res.status_code == 200
+    data = res.json()
+    assert data["name_font"] == "Trebuchet MS"
+    assert data["name_size"] == 32.0
+    assert data["name_color"] == "#0f172a"
+    assert data["course_font"] == "Garamond"
+    assert data["course_size"] == 17.0
+    assert data["course_color"] == "#334155"
+    assert data["date_font"] == "Courier New"
+    assert data["date_size"] == 11.0
+    assert data["date_color"] == "#64748b"
+

@@ -115,10 +115,19 @@ class TemplateResponse(BaseModel):
     font_family: Optional[str] = "sans"
     primary_color: Optional[str] = "#1E293B"
     accent_color: Optional[str] = "#2E86AB"
+    name_font: Optional[str] = "Arial"
+    name_size: Optional[float] = 34.0
+    name_color: Optional[str] = "#0A001D"
+    course_font: Optional[str] = "Arial"
+    course_size: Optional[float] = 16.0
+    course_color: Optional[str] = "#0A001D"
+    date_font: Optional[str] = "Arial"
+    date_size: Optional[float] = 12.0
+    date_color: Optional[str] = "#0A001D"
 
 
 class TemplateLayoutUpdate(BaseModel):
-    """Schema for updating template layout coordinates and visibility."""
+    """Schema for updating template layout coordinates, visibility, and typography/colors."""
     name_x_ratio: Optional[float] = 0.5
     name_y_ratio: Optional[float] = 0.515
     course_x_ratio: Optional[float] = None
@@ -127,6 +136,15 @@ class TemplateLayoutUpdate(BaseModel):
     date_y_ratio: Optional[float] = None
     show_course: Optional[bool] = True
     show_date: Optional[bool] = True
+    name_font: Optional[str] = None
+    name_size: Optional[float] = None
+    name_color: Optional[str] = None
+    course_font: Optional[str] = None
+    course_size: Optional[float] = None
+    course_color: Optional[str] = None
+    date_font: Optional[str] = None
+    date_size: Optional[float] = None
+    date_color: Optional[str] = None
 
 
 class CertificateResponse(BaseModel):

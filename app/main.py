@@ -64,6 +64,24 @@ async def lifespan(app: FastAPI):
                 cursor.execute("ALTER TABLE templates ADD COLUMN primary_color VARCHAR(20) DEFAULT '#1E293B'")
             if cols and "accent_color" not in cols:
                 cursor.execute("ALTER TABLE templates ADD COLUMN accent_color VARCHAR(20) DEFAULT '#2E86AB'")
+            if cols and "name_font" not in cols:
+                cursor.execute("ALTER TABLE templates ADD COLUMN name_font VARCHAR(50)")
+            if cols and "name_size" not in cols:
+                cursor.execute("ALTER TABLE templates ADD COLUMN name_size FLOAT DEFAULT 34.0")
+            if cols and "name_color" not in cols:
+                cursor.execute("ALTER TABLE templates ADD COLUMN name_color VARCHAR(20)")
+            if cols and "course_font" not in cols:
+                cursor.execute("ALTER TABLE templates ADD COLUMN course_font VARCHAR(50)")
+            if cols and "course_size" not in cols:
+                cursor.execute("ALTER TABLE templates ADD COLUMN course_size FLOAT DEFAULT 16.0")
+            if cols and "course_color" not in cols:
+                cursor.execute("ALTER TABLE templates ADD COLUMN course_color VARCHAR(20)")
+            if cols and "date_font" not in cols:
+                cursor.execute("ALTER TABLE templates ADD COLUMN date_font VARCHAR(50)")
+            if cols and "date_size" not in cols:
+                cursor.execute("ALTER TABLE templates ADD COLUMN date_size FLOAT DEFAULT 12.0")
+            if cols and "date_color" not in cols:
+                cursor.execute("ALTER TABLE templates ADD COLUMN date_color VARCHAR(20)")
             conn.connection.commit()
     except Exception:
         pass

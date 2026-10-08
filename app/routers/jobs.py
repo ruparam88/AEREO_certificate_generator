@@ -636,6 +636,25 @@ def update_template_layout(
     template.date_y_ratio = layout.date_y_ratio
     template.show_course = 1 if layout.show_course else 0
     template.show_date = 1 if layout.show_date else 0
+    if layout.name_font is not None:
+        template.name_font = layout.name_font
+    if layout.name_size is not None:
+        template.name_size = layout.name_size
+    if layout.name_color is not None:
+        template.name_color = layout.name_color
+    if layout.course_font is not None:
+        template.course_font = layout.course_font
+    if layout.course_size is not None:
+        template.course_size = layout.course_size
+    if layout.course_color is not None:
+        template.course_color = layout.course_color
+    if layout.date_font is not None:
+        template.date_font = layout.date_font
+    if layout.date_size is not None:
+        template.date_size = layout.date_size
+    if layout.date_color is not None:
+        template.date_color = layout.date_color
+
     if not template.is_builtin:
         template.overlay_mode = "preprinted"
 
@@ -667,6 +686,16 @@ async def websocket_preview_endpoint(websocket: WebSocket, db: Session = Depends
             show_course = bool(data.get("show_course", True))
             show_date = bool(data.get("show_date", True))
 
+            name_font = data.get("name_font")
+            name_size = float(data["name_size"]) if data.get("name_size") is not None else None
+            name_color = data.get("name_color")
+            course_font = data.get("course_font")
+            course_size = float(data["course_size"]) if data.get("course_size") is not None else None
+            course_color = data.get("course_color")
+            date_font = data.get("date_font")
+            date_size = float(data["date_size"]) if data.get("date_size") is not None else None
+            date_color = data.get("date_color")
+
             if action == "save_coords":
                 tmpl = db.query(Template).filter(
                     (Template.id == template_id) | (Template.name == template_id)
@@ -680,6 +709,25 @@ async def websocket_preview_endpoint(websocket: WebSocket, db: Session = Depends
                     tmpl.date_y_ratio = date_y
                     tmpl.show_course = 1 if show_course else 0
                     tmpl.show_date = 1 if show_date else 0
+                    if name_font is not None:
+                        tmpl.name_font = name_font
+                    if name_size is not None:
+                        tmpl.name_size = name_size
+                    if name_color is not None:
+                        tmpl.name_color = name_color
+                    if course_font is not None:
+                        tmpl.course_font = course_font
+                    if course_size is not None:
+                        tmpl.course_size = course_size
+                    if course_color is not None:
+                        tmpl.course_color = course_color
+                    if date_font is not None:
+                        tmpl.date_font = date_font
+                    if date_size is not None:
+                        tmpl.date_size = date_size
+                    if date_color is not None:
+                        tmpl.date_color = date_color
+
                     if not tmpl.is_builtin:
                         tmpl.overlay_mode = "preprinted"
                     db.commit()
@@ -688,7 +736,7 @@ async def websocket_preview_endpoint(websocket: WebSocket, db: Session = Depends
                         "status": "ok",
                         "template_id": tmpl.id,
                         "template_name": tmpl.name,
-                        "message": f"Layout coordinates saved successfully for '{tmpl.name}'!",
+                        "message": f"Layout & styling saved successfully for '{tmpl.name}'!",
                     })
                 else:
                     await websocket.send_json({
@@ -708,6 +756,15 @@ async def websocket_preview_endpoint(websocket: WebSocket, db: Session = Depends
                         "date_y": round(date_y, 3) if date_y is not None else None,
                         "show_course": show_course,
                         "show_date": show_date,
+                        "name_font": name_font,
+                        "name_size": name_size,
+                        "name_color": name_color,
+                        "course_font": course_font,
+                        "course_size": course_size,
+                        "course_color": course_color,
+                        "date_font": date_font,
+                        "date_size": date_size,
+                        "date_color": date_color,
                     },
                 })
     except WebSocketDisconnect:

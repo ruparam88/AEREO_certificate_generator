@@ -75,6 +75,15 @@ class Template(Base):
     font_family = Column(String(50), default="sans")  # "sans", "serif", "elegant"
     primary_color = Column(String(20), default="#1E293B")  # Hex color e.g. "#0A001D"
     accent_color = Column(String(20), default="#2E86AB")  # Hex color e.g. "#609AAD"
+    name_font = Column(String(50), nullable=True)  # e.g. "Arial", "Cinzel"
+    name_size = Column(Float, nullable=True, default=34.0)
+    name_color = Column(String(20), nullable=True)  # e.g. "#0A001D"
+    course_font = Column(String(50), nullable=True)
+    course_size = Column(Float, nullable=True, default=16.0)
+    course_color = Column(String(20), nullable=True)
+    date_font = Column(String(50), nullable=True)
+    date_size = Column(Float, nullable=True, default=12.0)
+    date_color = Column(String(20), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     jobs = relationship("Job", back_populates="template", cascade="all, delete-orphan")

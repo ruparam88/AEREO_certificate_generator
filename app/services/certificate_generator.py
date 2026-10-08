@@ -59,6 +59,23 @@ def _ensure_fonts_registered() -> None:
         ("serif_regular", "Georgia"): ["georgia.ttf", "times.ttf"],
         ("elegant_bold", "Palatino-Bold"): ["palab.ttf", "georgiab.ttf", "timesbd.ttf"],
         ("elegant_regular", "Palatino"): ["pala.ttf", "georgia.ttf", "times.ttf"],
+        ("arial_bold", "Arial-Bold"): ["arialbd.ttf", "segoeuib.ttf"],
+        ("arial_regular", "Arial"): ["arial.ttf", "segoeui.ttf"],
+        ("times_bold", "Times-Bold"): ["timesbd.ttf"],
+        ("times_regular", "Times"): ["times.ttf"],
+        ("georgia_bold", "Georgia-Bold"): ["georgiab.ttf"],
+        ("georgia_regular", "Georgia"): ["georgia.ttf"],
+        ("palatino_bold", "Palatino-Bold"): ["palab.ttf"],
+        ("palatino_regular", "Palatino"): ["pala.ttf"],
+        ("garamond_bold", "Garamond-Bold"): ["garabd.ttf"],
+        ("garamond_regular", "Garamond"): ["gara.ttf"],
+        ("verdana_bold", "Verdana-Bold"): ["verdanab.ttf"],
+        ("verdana_regular", "Verdana"): ["verdana.ttf"],
+        ("trebuchet_bold", "Trebuchet-Bold"): ["trebucbd.ttf"],
+        ("trebuchet_regular", "Trebuchet"): ["trebuc.ttf"],
+        ("courier_bold", "Courier-Bold"): ["courbd.ttf"],
+        ("courier_regular", "Courier"): ["cour.ttf"],
+        ("script", "BrushScript"): ["BRUSHSCI.TTF"],
     }
 
     if os.path.exists(windows_fonts):
@@ -89,6 +106,39 @@ def _get_font_pair(font_family: str | None) -> tuple[str, str]:
         return _FONT_MAP["elegant_bold"], _FONT_MAP["elegant_regular"]
     else:
         return _FONT_MAP["sans_bold"], _FONT_MAP["sans_regular"]
+
+
+def _resolve_field_font(font_name: str | None, bold: bool = True) -> str:
+    """Resolve ReportLab font name for an individual field (Name, Course, Date)."""
+    _ensure_fonts_registered()
+    if not font_name:
+        return "Helvetica-Bold" if bold else "Helvetica"
+
+    fn = font_name.lower().strip()
+    if any(k in fn for k in ("brush", "script", "vibes", "cursive")):
+        return _FONT_MAP.get("script", "Times-Italic")
+    elif "times" in fn:
+        return _FONT_MAP.get("times_bold" if bold else "times_regular", "Times-Bold" if bold else "Times-Roman")
+    elif "georgia" in fn:
+        return _FONT_MAP.get("georgia_bold" if bold else "georgia_regular", "Times-Bold" if bold else "Times-Roman")
+    elif "garamond" in fn:
+        return _FONT_MAP.get("garamond_bold" if bold else "garamond_regular", "Times-Bold" if bold else "Times-Roman")
+    elif "palatino" in fn or "antiqua" in fn:
+        return _FONT_MAP.get("palatino_bold" if bold else "palatino_regular", "Times-Bold" if bold else "Times-Roman")
+    elif "cinzel" in fn or "roman" in fn:
+        return _FONT_MAP.get("palatino_bold" if bold else "times_bold", "Times-Bold")
+    elif "verdana" in fn:
+        return _FONT_MAP.get("verdana_bold" if bold else "verdana_regular", "Helvetica-Bold" if bold else "Helvetica")
+    elif "trebuchet" in fn:
+        return _FONT_MAP.get("trebuchet_bold" if bold else "trebuchet_regular", "Helvetica-Bold" if bold else "Helvetica")
+    elif "courier" in fn or "mono" in fn:
+        return _FONT_MAP.get("courier_bold" if bold else "courier_regular", "Courier-Bold" if bold else "Courier")
+    elif "serif" in fn:
+        return _FONT_MAP.get("times_bold" if bold else "times_regular", "Times-Bold" if bold else "Times-Roman")
+    elif "elegant" in fn:
+        return _FONT_MAP.get("palatino_bold" if bold else "palatino_regular", "Times-Bold" if bold else "Times-Roman")
+    else:
+        return _FONT_MAP.get("arial_bold" if bold else "arial_regular", "Helvetica-Bold" if bold else "Helvetica")
 
 
 # ---------------------------------------------------------------------------
@@ -148,6 +198,15 @@ def generate_certificate(
     font_family: str = "sans",
     primary_color: str | None = None,
     accent_color: str | None = None,
+    name_font: str | None = None,
+    name_size: float | None = None,
+    name_color: str | None = None,
+    course_font: str | None = None,
+    course_size: float | None = None,
+    course_color: str | None = None,
+    date_font: str | None = None,
+    date_size: float | None = None,
+    date_color: str | None = None,
 ) -> str:
     """Generate a single PDF certificate and save it to disk.
 
@@ -245,6 +304,15 @@ def generate_certificate(
                     font_family=font_family,
                     primary_color=primary_color,
                     accent_color=accent_color,
+                    name_font=name_font,
+                    name_size=name_size,
+                    name_color=name_color,
+                    course_font=course_font,
+                    course_size=course_size,
+                    course_color=course_color,
+                    date_font=date_font,
+                    date_size=date_size,
+                    date_color=date_color,
                 )
             else:
                 _draw_certificate_content(
@@ -333,6 +401,15 @@ def generate_certificate(
                 font_family=font_family,
                 primary_color=primary_color,
                 accent_color=accent_color,
+                name_font=name_font,
+                name_size=name_size,
+                name_color=name_color,
+                course_font=course_font,
+                course_size=course_size,
+                course_color=course_color,
+                date_font=date_font,
+                date_size=date_size,
+                date_color=date_color,
             )
         else:
             _draw_certificate_content(
@@ -621,57 +698,68 @@ def _draw_preprinted_custom_content(
     font_family: str = "sans",
     primary_color: str | None = None,
     accent_color: str | None = None,
+    name_font: str | None = None,
+    name_size: float | None = None,
+    name_color: str | None = None,
+    course_font: str | None = None,
+    course_size: float | None = None,
+    course_color: str | None = None,
+    date_font: str | None = None,
+    date_size: float | None = None,
+    date_color: str | None = None,
 ) -> None:
     """Overlay recipient details onto a pre-designed certificate template.
 
     Neatly overlays:
-    1. Recipient name optically balanced in the designated placeholder area.
-    2. Course name perfectly sitting 4.5pt above the course underline line.
-    3. Issue date perfectly sitting 4.5pt above the date underline line.
+    1. Recipient name with field-specific font, size, and color.
+    2. Course name with field-specific font, size, and color.
+    3. Issue date with field-specific font, size, and color.
     4. Unique certificate ID at the bottom margin without visual clutter.
     """
     center_x = page_width / 2
-    font_bold, font_regular = _get_font_pair(font_family)
-    primary_col = _resolve_color(primary_color, HexColor("#0A001D"))
     footer_col = HexColor("#64748B")
 
-    # 1. Recipient Name: auto-adjust font size to fit seamlessly
-    name_font_size = 34
-    while name_font_size > 18 and c.stringWidth(recipient_name, font_bold, name_font_size) > page_width * 0.70:
+    # 1. Recipient Name: field-specific font, size, and color
+    resolved_name_font = _resolve_field_font(name_font or font_family, bold=True)
+    name_col = _resolve_color(name_color or primary_color, HexColor("#0A001D"))
+    name_font_size = float(name_size if name_size is not None else 34.0)
+    while name_font_size > 16 and c.stringWidth(recipient_name, resolved_name_font, name_font_size) > page_width * 0.85:
         name_font_size -= 2
 
-    c.setFont(font_bold, name_font_size)
-    c.setFillColor(primary_col)
+    c.setFont(resolved_name_font, name_font_size)
+    c.setFillColor(name_col)
     name_y = page_height * (name_y_ratio if name_y_ratio is not None else 0.558)
     name_x = page_width * (name_x_ratio if name_x_ratio is not None else 0.5)
     c.drawCentredString(name_x, name_y, recipient_name)
 
-    # 2. Course Name: sitting on underline, sized so it never collides with labels
+    # 2. Course Name: field-specific font, size, and color
     if show_course and course_y_ratio is not None and course_name:
-        course_y = page_height * course_y_ratio
-        course_x = page_width * (course_x_ratio if course_x_ratio is not None else 0.562)
-
-        # Underline available width is approx 33% of page width (~280pt on A4)
-        max_course_w = min(280.0, page_width * 0.35)
-        c_font_size = 16
-        while c_font_size > 10 and c.stringWidth(course_name, font_bold, c_font_size) > max_course_w:
+        resolved_course_font = _resolve_field_font(course_font or font_family, bold=True)
+        course_col = _resolve_color(course_color or primary_color, HexColor("#0A001D"))
+        c_font_size = float(course_size if course_size is not None else 16.0)
+        while c_font_size > 9 and c.stringWidth(course_name, resolved_course_font, c_font_size) > page_width * 0.70:
             c_font_size -= 1
 
-        c.setFont(font_bold, c_font_size)
-        c.setFillColor(primary_col)
+        course_y = page_height * course_y_ratio
+        course_x = page_width * (course_x_ratio if course_x_ratio is not None else 0.562)
+        c.setFont(resolved_course_font, c_font_size)
+        c.setFillColor(course_col)
         c.drawCentredString(course_x, course_y, course_name)
 
-    # 3. Issue Date: sitting on underline
+    # 3. Issue Date: field-specific font, size, and color
     if show_date and date_y_ratio is not None and date:
+        resolved_date_font = _resolve_field_font(date_font or font_family, bold=False)
+        date_col = _resolve_color(date_color or primary_color, HexColor("#0A001D"))
+        d_font_size = float(date_size if date_size is not None else 12.0)
+
         date_y = page_height * date_y_ratio
         date_x = page_width * (date_x_ratio if date_x_ratio is not None else 0.585)
-
-        c.setFont(font_bold, 13.5)
-        c.setFillColor(primary_col)
+        c.setFont(resolved_date_font, d_font_size)
+        c.setFillColor(date_col)
         c.drawCentredString(date_x, date_y, date)
 
     # 4. Certificate ID: subtle footer at bottom margin
-    c.setFont(font_regular, 8)
+    c.setFont("Helvetica", 8)
     c.setFillColor(footer_col)
     c.drawCentredString(center_x, 14, f"Certificate ID: {certificate_id}")
 

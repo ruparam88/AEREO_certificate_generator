@@ -20,8 +20,8 @@ A high-performance FastAPI service to generate PDF certificates in bulk with cus
 - $\color{#0969da}{\mathbf{\checkmark}}$ **1. Upload Custom Template**: Upload user-designed backgrounds in PNG, JPEG, or PDF formats
 - $\color{#0969da}{\mathbf{\checkmark}}$ **2. Individual & Bulk Downloads**: Download single certificates as PDF or all certificates as a ZIP archive
 - $\color{#0969da}{\mathbf{\checkmark}}$ **3. Excel / CSV File Upload**: Upload Excel spreadsheets (.xlsx) or CSV files to generate certificates in bulk
-- $\square$ **4. Font & Color Selection**: Select custom font styles and colors for certificate text
-- $\square$ **5. Live Certificate Preview**: Real-time preview showing how font style, size, and color look before generating
+- $\color{#0969da}{\mathbf{\checkmark}}$ **4. Font, Size & Color Selection**: Select from 10 distinct fonts, adjust font size with sliders, and pick colors using native color pickers independently for Recipient Name, Course, and Date
+- $\color{#0969da}{\mathbf{\checkmark}}$ **5. Live Certificate Preview**: Real-time canvas preview of font style, size, color, and positions synchronized over WebSocket and saved to template settings
 
 ## Tech Stack
 
@@ -41,6 +41,24 @@ Demonstrating custom template input vs. pixel-perfect generated certificate outp
 | Custom Template Input | Generated Certificate Output |
 |:---:|:---:|
 | ![Custom Template Input](outputs/template2.png) | ![Generated Certificate Output](outputs/certificate_custom_preprinted.png) |
+
+### Custom Position Alignment (Live WebSocket Positioner)
+Demonstrating real-time coordinate calibration where recipient name, course title, and date are dynamically positioned over a custom template:
+
+| Custom Template Input | Custom Position Aligned Output |
+|:---:|:---:|
+| ![Custom Template Input](outputs/template_new.png) | ![Custom Position Aligned Output](outputs/template_new_custom_position.png) |
+
+*PDF Vector File*: [`outputs/template_new_custom_position.pdf`](outputs/template_new_custom_position.pdf)
+
+### Custom Font Size, Typography & Color Selection
+Demonstrating independent field typography, custom font size scaling, and color matching (e.g. customized recipient font size & gold tone, course in Courier monospace):
+
+| Custom Template Input | Custom Font Size & Styling Output |
+|:---:|:---:|
+| ![Custom Template Input](outputs/template2.png) | ![Custom Font Size & Styling Output](outputs/template_2_custom_font_size.png) |
+
+*PDF Vector File*: [`outputs/template_2_custom_font_size.pdf`](outputs/template_2_custom_font_size.pdf)
 
 ### Built-in Templates
 Results across the 3 built-in styles:
@@ -129,6 +147,9 @@ pytest tests/ -v
 | `GET` | `/api/v1/jobs/{job_id}/download-all` | Download all certificates as ZIP |
 | `GET` | `/api/v1/templates` | List available templates |
 | `POST` | `/api/v1/templates/upload` | Upload a custom template |
+| `PUT` | `/api/v1/templates/{id}/layout` | Save coordinates, font styles, sizes, and colors for a template |
+| `GET` | `/api/v1/templates/{id}/background` | Fetch template background image for live canvas preview |
+| `WS` | `/api/v1/ws/preview` | Real-time WebSocket connection for live positioning and style sync |
 | `DELETE`| `/api/v1/templates/{id}` | Delete a custom template |
 | `DELETE`| `/api/v1/templates/custom/clear-all` | Clear all custom templates |
 

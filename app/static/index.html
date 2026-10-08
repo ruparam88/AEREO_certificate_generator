@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bulk Certificate Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Great+Vibes&display=swap" rel="stylesheet">
   <style>
     :root {
       --primary: #2563eb;
@@ -171,7 +174,7 @@
             <div style="font-size: 0.75rem; color: var(--gray-500); margin-top: 0.35rem;">Live Preview Canvas (Coordinates sync via WebSocket)</div>
           </div>
 
-          <!-- Position Sliders -->
+          <!-- Position Sliders & Field Typography Controls -->
           <div style="background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: 6px; padding: 1rem;">
             <!-- Recipient Name Controls -->
             <div style="margin-bottom: 1rem;">
@@ -183,6 +186,36 @@
               <input type="range" id="sliderNameY" min="10" max="90" step="0.5" value="55.8" style="width: 100%;" oninput="onSliderMove()">
               <label style="font-size: 0.75rem; color: var(--gray-600); display: block; margin-top: 0.35rem;">Horizontal (Center from left):</label>
               <input type="range" id="sliderNameX" min="10" max="90" step="0.5" value="50" style="width: 100%;" oninput="onSliderMove()">
+
+              <!-- Name Typography & Color -->
+              <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 0.5rem; align-items: end; margin-top: 0.5rem; background: white; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--gray-200);">
+                <div>
+                  <label style="font-size: 0.7rem; color: var(--gray-600); display: block; font-weight: 500;">Font Style:</label>
+                  <select id="fontNameSelect" onchange="onSliderMove()" style="width: 100%; padding: 0.25rem 0.35rem; font-size: 0.75rem; border: 1px solid var(--gray-300); border-radius: 4px;">
+                    <option value="Arial" selected>Arial</option>
+                    <option value="Times New Roman">Times New Roman</option>
+                    <option value="Georgia">Georgia</option>
+                    <option value="Garamond">Garamond</option>
+                    <option value="Palatino">Palatino</option>
+                    <option value="Verdana">Verdana</option>
+                    <option value="Trebuchet MS">Trebuchet MS</option>
+                    <option value="Courier New">Courier New</option>
+                    <option value="Cinzel">Cinzel</option>
+                    <option value="Great Vibes">Great Vibes</option>
+                  </select>
+                </div>
+                <div>
+                  <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--gray-600); font-weight: 500;">
+                    <span>Size:</span>
+                    <span id="valNameSize" style="color: var(--primary);">34px</span>
+                  </div>
+                  <input type="range" id="sliderNameSize" min="16" max="64" step="1" value="34" style="width: 100%;" oninput="onSliderMove()">
+                </div>
+                <div style="text-align: center;">
+                  <label style="font-size: 0.7rem; color: var(--gray-600); display: block; font-weight: 500;">Color:</label>
+                  <input type="color" id="pickerNameColor" value="#0a001d" oninput="onSliderMove()" title="Pick Name Color" style="cursor: pointer; height: 26px; width: 38px; padding: 1px; border: 1px solid var(--gray-300); border-radius: 4px; vertical-align: middle;">
+                </div>
+              </div>
             </div>
 
             <!-- Course Controls -->
@@ -199,6 +232,36 @@
                 <input type="range" id="sliderCourseY" min="10" max="90" step="0.5" value="46.6" style="width: 100%;" oninput="onSliderMove()">
                 <label style="font-size: 0.75rem; color: var(--gray-600); display: block; margin-top: 0.35rem;">Horizontal (Center from left):</label>
                 <input type="range" id="sliderCourseX" min="10" max="90" step="0.5" value="56.2" style="width: 100%;" oninput="onSliderMove()">
+
+                <!-- Course Typography & Color -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 0.5rem; align-items: end; margin-top: 0.5rem; background: white; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--gray-200);">
+                  <div>
+                    <label style="font-size: 0.7rem; color: var(--gray-600); display: block; font-weight: 500;">Font Style:</label>
+                    <select id="fontCourseSelect" onchange="onSliderMove()" style="width: 100%; padding: 0.25rem 0.35rem; font-size: 0.75rem; border: 1px solid var(--gray-300); border-radius: 4px;">
+                      <option value="Arial" selected>Arial</option>
+                      <option value="Times New Roman">Times New Roman</option>
+                      <option value="Georgia">Georgia</option>
+                      <option value="Garamond">Garamond</option>
+                      <option value="Palatino">Palatino</option>
+                      <option value="Verdana">Verdana</option>
+                      <option value="Trebuchet MS">Trebuchet MS</option>
+                      <option value="Courier New">Courier New</option>
+                      <option value="Cinzel">Cinzel</option>
+                      <option value="Great Vibes">Great Vibes</option>
+                    </select>
+                  </div>
+                  <div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--gray-600); font-weight: 500;">
+                      <span>Size:</span>
+                      <span id="valCourseSize" style="color: var(--primary);">16px</span>
+                    </div>
+                    <input type="range" id="sliderCourseSize" min="10" max="36" step="1" value="16" style="width: 100%;" oninput="onSliderMove()">
+                  </div>
+                  <div style="text-align: center;">
+                    <label style="font-size: 0.7rem; color: var(--gray-600); display: block; font-weight: 500;">Color:</label>
+                    <input type="color" id="pickerCourseColor" value="#0a001d" oninput="onSliderMove()" title="Pick Course Color" style="cursor: pointer; height: 26px; width: 38px; padding: 1px; border: 1px solid var(--gray-300); border-radius: 4px; vertical-align: middle;">
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -216,6 +279,36 @@
                 <input type="range" id="sliderDateY" min="10" max="90" step="0.5" value="33.4" style="width: 100%;" oninput="onSliderMove()">
                 <label style="font-size: 0.75rem; color: var(--gray-600); display: block; margin-top: 0.35rem;">Horizontal (Center from left):</label>
                 <input type="range" id="sliderDateX" min="10" max="90" step="0.5" value="58.5" style="width: 100%;" oninput="onSliderMove()">
+
+                <!-- Date Typography & Color -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 0.5rem; align-items: end; margin-top: 0.5rem; background: white; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--gray-200);">
+                  <div>
+                    <label style="font-size: 0.7rem; color: var(--gray-600); display: block; font-weight: 500;">Font Style:</label>
+                    <select id="fontDateSelect" onchange="onSliderMove()" style="width: 100%; padding: 0.25rem 0.35rem; font-size: 0.75rem; border: 1px solid var(--gray-300); border-radius: 4px;">
+                      <option value="Arial" selected>Arial</option>
+                      <option value="Times New Roman">Times New Roman</option>
+                      <option value="Georgia">Georgia</option>
+                      <option value="Garamond">Garamond</option>
+                      <option value="Palatino">Palatino</option>
+                      <option value="Verdana">Verdana</option>
+                      <option value="Trebuchet MS">Trebuchet MS</option>
+                      <option value="Courier New">Courier New</option>
+                      <option value="Cinzel">Cinzel</option>
+                      <option value="Great Vibes">Great Vibes</option>
+                    </select>
+                  </div>
+                  <div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--gray-600); font-weight: 500;">
+                      <span>Size:</span>
+                      <span id="valDateSize" style="color: var(--primary);">12px</span>
+                    </div>
+                    <input type="range" id="sliderDateSize" min="8" max="28" step="1" value="12" style="width: 100%;" oninput="onSliderMove()">
+                  </div>
+                  <div style="text-align: center;">
+                    <label style="font-size: 0.7rem; color: var(--gray-600); display: block; font-weight: 500;">Color:</label>
+                    <input type="color" id="pickerDateColor" value="#0a001d" oninput="onSliderMove()" title="Pick Date Color" style="cursor: pointer; height: 26px; width: 38px; padding: 1px; border: 1px solid var(--gray-300); border-radius: 4px; vertical-align: middle;">
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -361,6 +454,42 @@
       loadTemplateToPositioner(id);
     }
 
+    function sanitizeHex(val, fallback = "#0a001d") {
+      if (!val || typeof val !== "string") return fallback;
+      val = val.trim();
+      if (/^#[0-9a-fA-F]{6}$/.test(val)) return val;
+      if (/^#[0-9a-fA-F]{3}$/.test(val)) {
+        return "#" + val[1] + val[1] + val[2] + val[2] + val[3] + val[3];
+      }
+      return fallback;
+    }
+
+    function getCssFontFamily(fontName) {
+      switch (fontName) {
+        case "Times New Roman":
+          return "'Times New Roman', Times, serif";
+        case "Georgia":
+          return "Georgia, serif";
+        case "Garamond":
+          return "Garamond, serif";
+        case "Palatino":
+          return "'Palatino Linotype', Palatino, Georgia, serif";
+        case "Verdana":
+          return "Verdana, sans-serif";
+        case "Trebuchet MS":
+          return "'Trebuchet MS', sans-serif";
+        case "Courier New":
+          return "'Courier New', Courier, monospace";
+        case "Cinzel":
+          return "'Cinzel', Georgia, serif";
+        case "Great Vibes":
+          return "'Great Vibes', cursive";
+        case "Arial":
+        default:
+          return "Arial, -apple-system, BlinkMacSystemFont, sans-serif";
+      }
+    }
+
     function loadTemplateToPositioner(id) {
       const tmpl = loadedTemplatesList.find(t => t.id === id || t.name === id);
       if (!tmpl) return;
@@ -373,6 +502,18 @@
       const dateX = (tmpl.date_x_ratio != null ? tmpl.date_x_ratio : 0.5) * 100;
       const showCourse = tmpl.show_course !== 0 && tmpl.show_course !== false;
       const showDate = tmpl.show_date !== 0 && tmpl.show_date !== false;
+
+      const nameFont = tmpl.name_font || "Arial";
+      const nameSize = tmpl.name_size != null ? tmpl.name_size : 34;
+      const nameColor = tmpl.name_color || tmpl.primary_color || "#0a001d";
+
+      const courseFont = tmpl.course_font || "Arial";
+      const courseSize = tmpl.course_size != null ? tmpl.course_size : 16;
+      const courseColor = tmpl.course_color || tmpl.primary_color || "#0a001d";
+
+      const dateFont = tmpl.date_font || "Arial";
+      const dateSize = tmpl.date_size != null ? tmpl.date_size : 12;
+      const dateColor = tmpl.date_color || tmpl.primary_color || "#0a001d";
 
       const sliderNameY = document.getElementById("sliderNameY");
       const sliderNameX = document.getElementById("sliderNameX");
@@ -391,6 +532,27 @@
       if (sliderDateX) sliderDateX.value = dateX.toFixed(1);
       if (checkCourse) checkCourse.checked = showCourse;
       if (checkDate) checkDate.checked = showDate;
+
+      const fontNameSel = document.getElementById("fontNameSelect");
+      const sliderNameSz = document.getElementById("sliderNameSize");
+      const pickerNameCol = document.getElementById("pickerNameColor");
+      if (fontNameSel) fontNameSel.value = nameFont;
+      if (sliderNameSz) sliderNameSz.value = nameSize;
+      if (pickerNameCol) pickerNameCol.value = sanitizeHex(nameColor);
+
+      const fontCourseSel = document.getElementById("fontCourseSelect");
+      const sliderCourseSz = document.getElementById("sliderCourseSize");
+      const pickerCourseCol = document.getElementById("pickerCourseColor");
+      if (fontCourseSel) fontCourseSel.value = courseFont;
+      if (sliderCourseSz) sliderCourseSz.value = courseSize;
+      if (pickerCourseCol) pickerCourseCol.value = sanitizeHex(courseColor);
+
+      const fontDateSel = document.getElementById("fontDateSelect");
+      const sliderDateSz = document.getElementById("sliderDateSize");
+      const pickerDateCol = document.getElementById("pickerDateColor");
+      if (fontDateSel) fontDateSel.value = dateFont;
+      if (sliderDateSz) sliderDateSz.value = dateSize;
+      if (pickerDateCol) pickerDateCol.value = sanitizeHex(dateColor);
 
       updateSliderLabels();
 
@@ -426,6 +588,16 @@
       if (valName) valName.textContent = `X: ${nameX.toFixed(1)}%, Y: ${nameY.toFixed(1)}%`;
       if (valCourse) valCourse.textContent = showCourse ? `X: ${courseX.toFixed(1)}%, Y: ${courseY.toFixed(1)}%` : "Hidden";
       if (valDate) valDate.textContent = showDate ? `X: ${dateX.toFixed(1)}%, Y: ${dateY.toFixed(1)}%` : "Hidden";
+
+      const nameSize = document.getElementById("sliderNameSize")?.value || 34;
+      const courseSize = document.getElementById("sliderCourseSize")?.value || 16;
+      const dateSize = document.getElementById("sliderDateSize")?.value || 12;
+      const valNameSize = document.getElementById("valNameSize");
+      const valCourseSize = document.getElementById("valCourseSize");
+      const valDateSize = document.getElementById("valDateSize");
+      if (valNameSize) valNameSize.textContent = `${nameSize}px`;
+      if (valCourseSize) valCourseSize.textContent = `${courseSize}px`;
+      if (valDateSize) valDateSize.textContent = `${dateSize}px`;
 
       const courseGrp = document.getElementById("courseSliderGroup");
       const dateGrp = document.getElementById("dateSliderGroup");
@@ -481,17 +653,26 @@
       const showCourse = document.getElementById("checkShowCourse")?.checked ?? true;
       const showDate = document.getElementById("checkShowDate")?.checked ?? true;
 
-      const tmpl = loadedTemplatesList.find(t => t.id === selectedTemplateId || t.name === selectedTemplateId);
-      const primaryColor = (tmpl && tmpl.primary_color) ? tmpl.primary_color : "#0a001d";
-      const fontFamily = (tmpl && tmpl.font_family) ? tmpl.font_family : "sans-serif";
+      const nameFont = document.getElementById("fontNameSelect")?.value || "Arial";
+      const nameSize = parseFloat(document.getElementById("sliderNameSize")?.value || 34);
+      const nameColor = document.getElementById("pickerNameColor")?.value || "#0a001d";
+
+      const courseFont = document.getElementById("fontCourseSelect")?.value || "Arial";
+      const courseSize = parseFloat(document.getElementById("sliderCourseSize")?.value || 16);
+      const courseColor = document.getElementById("pickerCourseColor")?.value || "#0a001d";
+
+      const dateFont = document.getElementById("fontDateSelect")?.value || "Arial";
+      const dateSize = parseFloat(document.getElementById("sliderDateSize")?.value || 12);
+      const dateColor = document.getElementById("pickerDateColor")?.value || "#0a001d";
 
       // ReportLab coordinates: Y=0 at bottom, Canvas Y=0 at top
       const nameCanvasX = w * nameXRatio;
       const nameCanvasY = h * (1.0 - nameYRatio);
 
       // Recipient Name
-      ctx.fillStyle = primaryColor;
-      ctx.font = `bold 32px ${fontFamily}, 'Times New Roman', serif`;
+      ctx.fillStyle = nameColor;
+      const nameWeight = (nameFont === "Great Vibes") ? "normal" : "bold";
+      ctx.font = `${nameWeight} ${nameSize}px ${getCssFontFamily(nameFont)}`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText("Jane Doe", nameCanvasX, nameCanvasY);
@@ -507,8 +688,9 @@
         const courseCanvasX = w * courseXRatio;
         const courseCanvasY = h * (1.0 - courseYRatio);
 
-        ctx.fillStyle = primaryColor;
-        ctx.font = `bold 16px ${fontFamily}, 'Times New Roman', serif`;
+        ctx.fillStyle = courseColor;
+        const courseWeight = (courseFont === "Great Vibes") ? "normal" : "bold";
+        ctx.font = `${courseWeight} ${courseSize}px ${getCssFontFamily(courseFont)}`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText("Mastering Drone Analytics & AI", courseCanvasX, courseCanvasY);
@@ -524,8 +706,9 @@
         const dateCanvasX = w * dateXRatio;
         const dateCanvasY = h * (1.0 - dateYRatio);
 
-        ctx.fillStyle = primaryColor;
-        ctx.font = `600 13px ${fontFamily}, sans-serif`;
+        ctx.fillStyle = dateColor;
+        const dateWeight = (dateFont === "Great Vibes") ? "normal" : "600";
+        ctx.font = `${dateWeight} ${dateSize}px ${getCssFontFamily(dateFont)}`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText("2024-12-15", dateCanvasX, dateCanvasY);
@@ -558,6 +741,15 @@
         date_y: parseFloat(document.getElementById("sliderDateY").value) / 100,
         show_course: document.getElementById("checkShowCourse").checked,
         show_date: document.getElementById("checkShowDate").checked,
+        name_font: document.getElementById("fontNameSelect")?.value || "Arial",
+        name_size: parseFloat(document.getElementById("sliderNameSize")?.value || 34),
+        name_color: document.getElementById("pickerNameColor")?.value || "#0a001d",
+        course_font: document.getElementById("fontCourseSelect")?.value || "Arial",
+        course_size: parseFloat(document.getElementById("sliderCourseSize")?.value || 16),
+        course_color: document.getElementById("pickerCourseColor")?.value || "#0a001d",
+        date_font: document.getElementById("fontDateSelect")?.value || "Arial",
+        date_size: parseFloat(document.getElementById("sliderDateSize")?.value || 12),
+        date_color: document.getElementById("pickerDateColor")?.value || "#0a001d",
       };
       previewWs.send(JSON.stringify(payload));
     }
@@ -565,9 +757,19 @@
     async function saveTemplateLayout() {
       const status = document.getElementById("saveLayoutStatus");
       if (status) {
-        status.textContent = "Saving layout...";
+        status.textContent = "Saving layout & styling...";
         status.style.color = "#1e40af";
       }
+
+      const name_font = document.getElementById("fontNameSelect")?.value || "Arial";
+      const name_size = parseFloat(document.getElementById("sliderNameSize")?.value || 34);
+      const name_color = document.getElementById("pickerNameColor")?.value || "#0a001d";
+      const course_font = document.getElementById("fontCourseSelect")?.value || "Arial";
+      const course_size = parseFloat(document.getElementById("sliderCourseSize")?.value || 16);
+      const course_color = document.getElementById("pickerCourseColor")?.value || "#0a001d";
+      const date_font = document.getElementById("fontDateSelect")?.value || "Arial";
+      const date_size = parseFloat(document.getElementById("sliderDateSize")?.value || 12);
+      const date_color = document.getElementById("pickerDateColor")?.value || "#0a001d";
 
       const payload = {
         action: "save_coords",
@@ -580,6 +782,15 @@
         date_y: parseFloat(document.getElementById("sliderDateY").value) / 100,
         show_course: document.getElementById("checkShowCourse").checked,
         show_date: document.getElementById("checkShowDate").checked,
+        name_font: name_font,
+        name_size: name_size,
+        name_color: name_color,
+        course_font: course_font,
+        course_size: course_size,
+        course_color: course_color,
+        date_font: date_font,
+        date_size: date_size,
+        date_color: date_color,
       };
 
       if (previewWs && previewWs.readyState === WebSocket.OPEN) {
@@ -599,12 +810,21 @@
             date_y_ratio: payload.date_y,
             show_course: payload.show_course,
             show_date: payload.show_date,
+            name_font: payload.name_font,
+            name_size: payload.name_size,
+            name_color: payload.name_color,
+            course_font: payload.course_font,
+            course_size: payload.course_size,
+            course_color: payload.course_color,
+            date_font: payload.date_font,
+            date_size: payload.date_size,
+            date_color: payload.date_color,
           }),
         });
         if (!res.ok) throw new Error("Failed to save layout via API");
         const updatedTmpl = await res.json();
         if (status) {
-          status.textContent = `Layout saved for '${updatedTmpl.name}'!`;
+          status.textContent = `Layout & styling saved for '${updatedTmpl.name}'!`;
           status.style.color = "#166534";
         }
         const idx = loadedTemplatesList.findIndex(t => t.id === selectedTemplateId);
@@ -629,6 +849,19 @@
       document.getElementById("sliderDateY").value = isPreprinted ? 33.4 : 33.0;
       document.getElementById("checkShowCourse").checked = true;
       document.getElementById("checkShowDate").checked = true;
+
+      document.getElementById("fontNameSelect").value = tmpl?.name_font || "Arial";
+      document.getElementById("sliderNameSize").value = tmpl?.name_size || 34;
+      document.getElementById("pickerNameColor").value = sanitizeHex(tmpl?.name_color || tmpl?.primary_color || "#0a001d");
+
+      document.getElementById("fontCourseSelect").value = tmpl?.course_font || "Arial";
+      document.getElementById("sliderCourseSize").value = tmpl?.course_size || 16;
+      document.getElementById("pickerCourseColor").value = sanitizeHex(tmpl?.course_color || tmpl?.primary_color || "#0a001d");
+
+      document.getElementById("fontDateSelect").value = tmpl?.date_font || "Arial";
+      document.getElementById("sliderDateSize").value = tmpl?.date_size || 12;
+      document.getElementById("pickerDateColor").value = sanitizeHex(tmpl?.date_color || tmpl?.primary_color || "#0a001d");
+
       onSliderMove();
     }
 

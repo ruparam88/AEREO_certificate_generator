@@ -249,3 +249,42 @@ def test_dynamic_font_scaling_for_long_names(tmp_path):
     assert os.path.exists(pdf_path)
     with open(pdf_path, "rb") as f:
         assert f.read(5) == b"%PDF-"
+
+
+def test_per_field_fonts_sizes_and_colors(tmp_path):
+    """Test generating certificates with independent fonts, sizes, and colors for Name, Course, and Date."""
+    from PIL import Image
+    from app.services.certificate_generator import generate_certificate
+
+    img_path = str(tmp_path / "per_field_template.png")
+    im = Image.new("RGB", (1200, 800), color=(250, 250, 250))
+    im.save(img_path)
+
+    test_fonts = [
+        "Arial", "Times New Roman", "Georgia", "Garamond", "Palatino",
+        "Verdana", "Trebuchet MS", "Courier New", "Cinzel", "Great Vibes",
+    ]
+
+    for i, font in enumerate(test_fonts):
+        out = generate_certificate(
+            recipient_name=f"Scholar {font}",
+            course_name=f"Mastery in {font}",
+            date="2025-01-10",
+            certificate_id=f"cert-font-{i}",
+            output_dir=str(tmp_path),
+            custom_template_path=img_path,
+            overlay_mode="preprinted",
+            name_font=font,
+            name_size=36.0,
+            name_color="#1e3a8a",
+            course_font="Arial" if font != "Arial" else "Georgia",
+            course_size=18.0,
+            course_color="#047857",
+            date_font="Courier New" if font != "Courier New" else "Times New Roman",
+            date_size=11.0,
+            date_color="#b45309",
+        )
+        assert os.path.exists(out)
+        with open(out, "rb") as f:
+            assert f.read(5) == b"%PDF-"
+
